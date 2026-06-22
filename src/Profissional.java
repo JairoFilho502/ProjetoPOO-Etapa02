@@ -127,4 +127,64 @@ class Fisioterapeuta extends Profissional{
 }
 
 
+// acrescentando a classe psicologo(jornadas 16 e 25)
+
+class Psicologo extends Profissional {
+
+    public String abordagem;
+
+
+
+    public Psicologo(String nome, String registroProfissional, double valorConsulta, String abordagem){
+
+
+
+        super(nome, "psicologia", registroProfissional, valorConsulta);
+
+        this.abordagem = abordagem;
+
+
+
+    }
+
+
+
+    
+
+    // override de exibirresumo
+
+    @Override
+
+    public String exibirResumo(){
+
+        return super.exibirResumo() + " | Abordagem: " + abordagem;
+
+    }
+
+
+
+
+
+
+
+
+
+    // acrescentando o override obrigatório de registro especifico
+
+    @Override
+
+    public void registrarEspecifico(Atendimento atendimento) {
+
+        if(atendimento != null && atendimento.descricao != null){
+
+            atendimento.descricao = "[Psicologia - " + this.abordagem + "] " + atendimento.descricao;
+
+
+
+        }
+
+    }
+
+}
+
 
