@@ -1,67 +1,49 @@
-public class Profissional {
-    public String nome;
+import java.util.ArrayList;
+import java.util.List;
+
+
+
+
+
+// Classe tornada abstract
+public abstract class Profissional extends Pessoa {
     public String especialidade;
     public String registroProfissional;
     public double valorConsulta;
-    public String[] diasDisponiveis;
+    public List<String> horarios; // alterando dias disponiveis por horario com genrics
     public int totalDias;
 
     // so nome e especialidade
-    public Profissional(String nome, String especialidade) {
-        this.nome = nome;
-        this.especialidade = especialidade;
-        this.registroProfissional = "";
-        this.valorConsulta = 0;
-        this.diasDisponiveis = new String[7];
-        this.totalDias = 0;
-    }
-
+    // adaptado para chamar nome e inicializar lista
     public Profissional(String nome, String especialidade, String registroProfissional, double valorConsulta) {
-        this.nome = nome;
+        super(nome); // chama o construtor da classe base pessoa
         this.especialidade = especialidade;
         this.registroProfissional = registroProfissional;
         this.valorConsulta = valorConsulta;
-        this.diasDisponiveis = new String[7];
-        this.totalDias = 0;
-    }
-
-    // construtor completo com dias
-    public Profissional(String nome, String especialidade, String registroProfissional,
-                        double valorConsulta, String[] dias, int totalDias) {
-        this.nome = nome;
-        this.especialidade = especialidade;
-        this.registroProfissional = registroProfissional;
-        this.valorConsulta = valorConsulta;
-        this.diasDisponiveis = new String[7];
-        this.totalDias = totalDias;
-        for (int i = 0; i < totalDias; i++) {
-            this.diasDisponiveis[i] = dias[i];
-        }
+        this.horarios = new ArrayList<>(); //inicializando a lista de horarios
+        
     }
 
     public void atualizar(String registro, double valor) {
+        if (validarRegistro(registro)) { // uso do metodo protegido}
         this.registroProfissional = registro;
         this.valorConsulta = valor;
-    }
-
-    public void atualizar(String registro, double valor, String[] dias, int totalDias) {
-        this.registroProfissional = registro;
-        this.valorConsulta = valor;
-        this.totalDias = totalDias;
-        for (int i = 0; i < totalDias; i++) {
-            this.diasDisponiveis[i] = dias[i];
         }
     }
+
+    public void atualizar(String registro, double valor, List<String> novosHorarios) {
+        if (validarRegistro(registro)){
+            this.registroProfissional = registro;
+            this.valorConsulta = valor;
+            this.horarios = novosHorarios;
+        }
+    }        
 
     // verifica se o profissional atende naquele dia
     public boolean atendeNoDia(String dia) {
-        for (int i = 0; i < totalDias; i++) {
-            if (diasDisponiveis[i].equals(dia)) {
-                return true;
-            }
-        }
-        return false;
+        return this.horarios.contains(dia);
     }
+  
 
     // valida as especialidades aceitas pela clinica
     public static boolean especialidadeValida(String esp) {
@@ -72,13 +54,28 @@ public class Profissional {
         return false;
     }
 
-    public String exibirResumo() {
-        String dias = "";
-        for (int i = 0; i < totalDias; i++) {
-            if (i > 0) dias = dias + ", ";
-            dias = dias + diasDisponiveis[i];
-        }
-        return "Nome: " + nome + " | Espec: " + especialidade + " | Reg: " + registroProfissional
-                + " | Valor: R$" + valorConsulta + " | Dias: " + dias;
+
+    @Override
+    public String exibirResumo(){
+        return super.exibirResumo() + " | Espec: " + especialidade + " | Reg: " + registroProfissional
+                + " | Valor: R$" + valorConsulta + " | Dias: " + horarios.toString();
     }
-}
+
+
+    // declaração método abstrato( jornadas 17 e 25
+    public abstract void registrarEspecifico(Atendimento atendimento);
+
+    // adicionando metodo protected
+    protected boolean validarRegistro(String registro) {
+        if (registro == null || registro.isEmpty()){
+            System.out.println("Erro: Registro profissional inválido");
+            return false;
+        }
+        return true;
+    
+    }
+
+
+
+// acrescentando as subclasses 
+
