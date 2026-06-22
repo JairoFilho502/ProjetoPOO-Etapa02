@@ -78,7 +78,6 @@ public abstract class Profissional extends Pessoa {
 
 
 // acrescentando as subclasses 
-
 // classe fisioterapeuta
 
 class Fisioterapeuta extends Profissional{
@@ -94,3 +93,38 @@ class Fisioterapeuta extends Profissional{
         this.totalSessoesPrevistas = sessoes;
 
     }
+
+
+
+    // acrescentando o override de exibirresumo
+
+    @Override 
+
+    public String exibirResumo() {
+
+        return super.exibirResumo() + " | Sessões Previstas: " + totalSessoesPrevistas;
+
+
+
+    }
+
+
+
+    // override de registroespecifico
+
+    @Override
+
+    public void registrarEspecifico(Atendimento atendimento){
+
+        if (atendimento != null && atendimento.descricao != null) {
+
+            atendimento.descricao = "[Fisioterapia] " + atendimento.descricao;
+
+        }
+
+    }
+
+}
+
+
+
