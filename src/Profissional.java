@@ -79,3 +79,18 @@ public abstract class Profissional extends Pessoa {
 
 // acrescentando as subclasses 
 
+// classe fisioterapeuta
+
+class Fisioterapeuta extends Profissional{
+
+    public int totalSessoesPrevistas;
+
+
+
+    public Fisioterapeuta(String nome, String registroProfissional, double valorConsulta, int sessoes) {
+
+        super(nome, "fisioterapia", registroProfissional, valorConsulta);
+
+        this.totalSessoesPrevistas = sessoes;
+
+    }
