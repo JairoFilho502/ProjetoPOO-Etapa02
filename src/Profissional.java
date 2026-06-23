@@ -5,29 +5,33 @@ import java.util.List;
 
 
 
-// Classe tornada abstract
+// Classe PROFISSIONAL tornada abstract
 public abstract class Profissional extends Pessoa {
     public String especialidade;
     public String registroProfissional;
     public double valorConsulta;
     public List<String> horarios; // alterando dias disponiveis por horario com genrics
-    public int totalDias;
+
+
+
 
     // so nome e especialidade
     // adaptado para chamar nome e inicializar lista
     public Profissional(String nome, String especialidade, String registroProfissional, double valorConsulta) {
         super(nome); // chama o construtor da classe base pessoa
         this.especialidade = especialidade;
-        this.registroProfissional = registroProfissional;
-        this.valorConsulta = valorConsulta;
+        this.registroProfissional = registroProfissional; 
+        this.valorConsulta = valorConsulta; 
         this.horarios = new ArrayList<>(); //inicializando a lista de horarios
         
     }
 
     public void atualizar(String registro, double valor) {
-        if (validarRegistro(registro)) { // uso do metodo protegido}
-        this.registroProfissional = registro;
-        this.valorConsulta = valor;
+        if (validarRegistro(registro)) {                // uso do metodo protegido}
+
+        
+            this.registroProfissional = registro;
+            this.valorConsulta = valor;
         }
     }
 
@@ -77,8 +81,17 @@ public abstract class Profissional extends Pessoa {
 
 
 
-// acrescentando as subclasses 
+// acrescentando a primeira subclasses:
+
+
+
+
 // classe fisioterapeuta
+
+
+
+
+
 
 class Fisioterapeuta extends Profissional{
 
@@ -116,9 +129,14 @@ class Fisioterapeuta extends Profissional{
 
     public void registrarEspecifico(Atendimento atendimento){
 
-        if (atendimento != null && atendimento.descricao != null) {
+        if(atendimento != null) {
 
-            atendimento.descricao = "[Fisioterapia] " + atendimento.descricao;
+            if (atendimento.observacoes == null || atendimento.observacoes.isEmpty()) {
+                atendimento.observacoes = "[Fisioterapia]";
+            } else{
+                atendimento.observacoes += "[Fisioterapia]";
+            }
+
 
         }
 
@@ -127,7 +145,12 @@ class Fisioterapeuta extends Profissional{
 }
 
 
-// acrescentando a classe psicologo(jornadas 16 e 25)
+
+
+
+
+
+// acrescentando a segunda classe psicologo(jornadas 16 e 25)
 
 class Psicologo extends Profissional {
 
@@ -175,10 +198,14 @@ class Psicologo extends Profissional {
 
     public void registrarEspecifico(Atendimento atendimento) {
 
-        if(atendimento != null && atendimento.descricao != null){
-
-            atendimento.descricao = "[Psicologia - " + this.abordagem + "] " + atendimento.descricao;
-
+        if(atendimento != null){
+            String info = "[Psicologia - " + this.abordagem + "] ";
+            if (atendimento.observacoes == null || atendimento.observacoes.isEmpty()) {
+                atendimento.observacoes = info;
+            } else {
+                atendimento.observacoes += " " + info;
+            }
+        }
 
 
         }
