@@ -78,10 +78,10 @@ public abstract class Profissional extends Pessoa {
         return true;
     
     }
+}
 
 
-
-// acrescentando a primeira subclasses:
+// acrescentando a primeira subclasse:
 
 
 
