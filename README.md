@@ -112,46 +112,9 @@ Utilizado para:
 * Busca de profissionais por nome.
 
 ---
-
-# Compilação do Projeto
-
-Acesse a pasta raiz do projeto e execute:
-
-```bash
-javac *.java
-```
-
-ou
-
-```bash
-javac */*.java
-```
-
-dependendo da organização dos pacotes.
-
----
-
-# Execução do Projeto
-
-Após a compilação:
-
-```bash
-java Main
-```
-
-ou
-
-```bash
-java principal.Main
-```
-
-caso a classe Main esteja dentro de um pacote.
-
----
-
 # Como Utilizar o Sistema
 
-## 1. Cadastrar Paciente
+## 1. Cadastrar o Paciente
 
 1. Escolha a opção "Cadastrar Paciente".
 2. Informe os dados solicitados.
@@ -210,7 +173,7 @@ caso a classe Main esteja dentro de um pacote.
 
 ---
 
-# Conceitos de Programação Orientada a Objetos Aplicados
+# Conceitos de Programação Orientada a Objetos Aplicados ao projeto:
 
 * Encapsulamento
 * Herança
