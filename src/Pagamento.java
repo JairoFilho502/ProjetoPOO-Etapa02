@@ -1,58 +1,30 @@
-public class Pagamento {
-    public int indiceConsulta;
-    public double valorFinal;
-    public String tipoPagamento;
-    public int parcelas;
-
-    public Pagamento(int indiceConsulta, double valorFinal, String tipoPagamento) {
+//Nao instanciem pagamentos diretamente 
+public abstract class Pagamento {
+    
+    // Atributos privados para armazenar o indice da cunsulta e o valor base
+    protected int indiceConsulta;
+    protected double valorBase;
+    
+    public Pagamento(int indiceConsulta, double valorBase) {
         this.indiceConsulta = indiceConsulta;
-        this.valorFinal = valorFinal;
-        this.tipoPagamento = tipoPagamento;
-        this.parcelas = 1;
+        this.valorBase = valorBase;
     }
 
-    // com parcelas (so pra cartao)
-    public Pagamento(int indiceConsulta, double valorFinal, String tipoPagamento, int parcelas) {
-        this.indiceConsulta = indiceConsulta;
-        this.valorFinal = valorFinal;
-        this.tipoPagamento = tipoPagamento;
-        this.parcelas = parcelas;
+    // Getters e Setters
+    public int getIndiceConsulta() { return indiceConsulta; }
+    public void setIndiceConsulta(int indiceConsulta) { this.indiceConsulta = indiceConsulta; }
+    public double getValorBase() { return valorBase; }
+    
+    public void setValorBase(double valorBase) { 
+        if (valorBase >= 0) this.valorBase = valorBase; 
+        else System.out.println("Erro: Valor não pode ser negativo.");
     }
 
-    // sem desconto nenhum
-    public static double calcularValor(double valorBase) {
-        return valorBase;
-    }
-
-    // com desconto em percentual
-    public static double calcularValor(double valorBase, double percentualDesconto) {
-        double desconto = valorBase * percentualDesconto / 100;
-        double valor = valorBase - desconto;
-        if (valor < 0) {
-            valor = 0;
-        }
-        return valor;
-    }
-
-    // com desconto e multa somada
-    public static double calcularValor(double valorBase, double percentualDesconto, double multa) {
-        double desconto = valorBase * percentualDesconto / 100;
-        double valor = valorBase - desconto + multa;
-        if (valor < 0) {
-            valor = 0;
-        }
-        return valor;
-    }
-
+    // O método calcularValorFinal será implementada nas classes filhas pq cada pagamento vai ter uma forma de calcular o valor
+    public abstract double calcularValorFinal();
+    
+    // método concreto que exibe o resumo do pagamento e os valores base e final
     public String exibirResumo() {
-        // arredonda pra 2 casas
-        double valorArredondado = Math.round(valorFinal * 100.0) / 100.0;
-        String resumo = "Consulta #" + indiceConsulta + " | Valor: R$" + valorArredondado
-                + " | Tipo: " + tipoPagamento + " | Parcelas: " + parcelas;
-        if (parcelas > 1) {
-            double valorParcela = Math.round((valorFinal / parcelas) * 100.0) / 100.0;
-            resumo = resumo + " (R$" + valorParcela + " cada)";
-        }
-        return resumo;
+        return "Consulta #" + indiceConsulta + " | Valor Base: R$" + valorBase;
     }
 }
