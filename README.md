@@ -196,6 +196,6 @@ Arthur Dias
 Ezdras Virgulino
 Jairo George
 João Victor Serrano
-José Guilher
+José Guilherme Ferreira Alves
 Pedro 
 Thales Alberto
