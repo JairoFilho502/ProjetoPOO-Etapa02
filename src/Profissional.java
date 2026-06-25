@@ -171,36 +171,38 @@ class Psicologo extends Profissional {
 
 // classe dos nutricionistas
 
-public class Nutricionista extends Profissional {
-    public String focoNutricional;
+ class Nutricionista extends Profissional {
+    public String focoPlanoNutricional;
 
-    public Nutricionista(String nome, String registroProfissional, double valorConsulta, String focoNutricional) {
+      public Nutricionista(String nome, String registroProfissional, double valorConsulta, String focoPlanoNutricional) {  
         super(nome, "nutricao", registroProfissional, valorConsulta);
-        this.focoNutricional = focoNutricional;
+        this.focoPlanoNutricional = focoPlanoNutricional;
     }
 
+
+    // override de exibirResumo
 
     @Override
     public String exibirResumo() {
-        return super.exibirResumo() + "| Foco Nutricional: " + focoNutricional;
+        return super.exibirResumo() + " | Foco Nutricional: " + focoPlanoNutricional;
     }
+
+
+
+    // override obrigatório de registro específico
 
     @Override
     public void registrarEspecifico(Atendimento atendimento) {
         if (atendimento != null) {
-            String info = "[Nutrição - Foco: " + focoNutricional + "]";
-            if (atendimento.observacoes == null || atendimento.observacoes.isEmpty()){
+            String info =  "[Nutrição -- Foco: " + focoPlanoNutricional + "]";
+            if ( atendimento.observacoes == null || atendimento.observacoes.isEmpty()) {
                 atendimento.observacoes = info;
             } else {
-                atendimento.observacoes = info;
+                atendimento.observacoes += " " + info;
             }
-            }
-            })
         }
     }
-
-}
-
+}}
 
 
 
