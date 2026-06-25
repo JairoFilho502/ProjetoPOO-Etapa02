@@ -1,6 +1,7 @@
 public abstract class Pessoa {
     public String nome;
 
+
     public Pessoa(String nome) {
         this.nome = nome;
     }
@@ -12,4 +13,4 @@ public abstract class Pessoa {
 }
 
 
-// criação de uma superclasse pessoa para servir de extends em profissional e paciente
+// criação de uma superclasse abstrata pessoa para servir na hierarquia em profissional e paciente

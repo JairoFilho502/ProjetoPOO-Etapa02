@@ -1,5 +1,4 @@
-public class Paciente {
-    public String nome;
+public class Paciente extends Pessoa {
     public String cpf;
     public int idade;
     public String telefone;
