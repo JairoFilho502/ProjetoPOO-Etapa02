@@ -6,7 +6,7 @@ public class Paciente extends Pessoa {
     public boolean ativo;
 
     public Paciente(String nome, String cpf) {
-        this.nome = nome;
+        super(nome);
         this.cpf = cpf;
         this.idade = 0;
         this.telefone = "";
@@ -15,7 +15,7 @@ public class Paciente extends Pessoa {
     }
 
     public Paciente(String nome, String cpf, int idade, String telefone) {
-        this.nome = nome;
+        super(nome);
         this.cpf = cpf;
         this.idade = idade;
         this.telefone = telefone;
@@ -25,7 +25,7 @@ public class Paciente extends Pessoa {
 
     // construtor com todos os dados
     public Paciente(String nome, String cpf, int idade, String telefone, String convenioNome) {
-        this.nome = nome;
+        super(nome);
         this.cpf = cpf;
         this.idade = idade;
         this.telefone = telefone;
@@ -33,13 +33,13 @@ public class Paciente extends Pessoa {
         this.ativo = true;
     }
 
-    // atualiza so idade e telefone
+    // atualiza só idade e telefone
     public void complementar(int idade, String telefone) {
         this.idade = idade;
         this.telefone = telefone;
     }
 
-    // atualiza tudo incluindo convenio
+    // atualiza tudo incluindo convênio
     public void complementar(int idade, String telefone, String convenioNome) {
         this.idade = idade;
         this.telefone = telefone;
@@ -50,13 +50,15 @@ public class Paciente extends Pessoa {
         this.ativo = false;
     }
 
+    @Override
     public String exibirResumo() {
-        String status = "Sim";
-        if (!ativo) {
-            status = "Nao";
-        }
-        return "Nome: " + nome + " | CPF: " + cpf + " | Idade: " + idade
-                + " | Tel: " + telefone + " | Convenio: " + convenioNome
+        String status = ativo ? "Sim" : "Nao";
+
+        return "Nome: " + nome
+                + " | CPF: " + cpf
+                + " | Idade: " + idade
+                + " | Tel: " + telefone
+                + " | Convenio: " + convenioNome
                 + " | Ativo: " + status;
     }
 }
