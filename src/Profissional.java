@@ -167,7 +167,7 @@ class Psicologo extends Profissional {
             }
         }
     }
-
+}
 
 // classe dos nutricionistas
 
