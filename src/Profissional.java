@@ -202,7 +202,8 @@ class Psicologo extends Profissional {
             }
         }
     }
-}}
+}
+
 
 
 
