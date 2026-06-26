@@ -1,4 +1,4 @@
-public class Atendimento {
+public class Atendimento implements Exportavel {
     public int indiceConsulta;
     public String observacoes;
     public String diagnostico;
@@ -70,5 +70,11 @@ public class Atendimento {
             }
         }
         return resumo;
+    }
+    @Override
+    public String exportarDados() {
+        // Implementação obrigatória da interface Exportavel
+        // Por agora retorna algo simples
+        return "Atendimento | Observações: " + observacoes;
     }
 }
