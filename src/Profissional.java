@@ -1,8 +1,11 @@
+
+// importando bibliotecas de collections
 import java.util.ArrayList;
 import java.util.List;
 
+
 // Classe PROFISSIONAL tornada abstract
-public abstract class Profissional extends Pessoa {
+public abstract class Profissional extends Pessoa{
     public String especialidade;
     public String registroProfissional;
     public double valorConsulta;
@@ -12,8 +15,9 @@ public abstract class Profissional extends Pessoa {
 
     // só nome e especialidade
     // adaptado para chamar nome e inicializar lista
-    public Profissional(String nome, String especialidade, String registroProfissional, double valorConsulta) {
-        super(nome); // chama o construtor da classe base pessoa
+    public Profissional(String nome, String especialidade, String registroProfissional, double valorConsulta){
+        super(nome); //chamando o construtor da superclasse Pessoa
+
         this.especialidade = especialidade;
         this.registroProfissional = registroProfissional;
         this.valorConsulta = valorConsulta;
@@ -21,37 +25,38 @@ public abstract class Profissional extends Pessoa {
     }
 
     public void atualizar(String registro, double valor) {
-        if (validarRegistro(registro)) {
+        if(validarRegistro(registro)){
             this.registroProfissional = registro;
             this.valorConsulta = valor;
         }
     }
-
-    public void atualizar(String registro, double valor, List<HorarioDisponivel> novosHorarios) {
-        if (validarRegistro(registro)) {
-            this.registroProfissional = registro;
-            this.valorConsulta = valor;
-            this.horarios = novosHorarios;
-        }
+        
+    
+    public void atualizar(String registro, double valor, List<HorarioDisponivel> novosHorarios){
+    if(validarRegistro(registro)){
+        this.registroProfissional = registro;
+        this.valorConsulta = valor;
+        this.horarios = novosHorarios;
     }
+   }
 
     // verifica se o profissional atende naquele dia
-    public boolean atendeNoDia(String dia) {
+    public boolean atendeNoDia(String dia){
         for (HorarioDisponivel horario : horarios) {
-            if (horario.getDiaSemana().equalsIgnoreCase(dia)) {
+            if (horario.getDiaSemana().equalsIgnoreCase(dia)){
                 return true;
             }
         }
         return false;
-    }
+    } 
 
     public void adicionarHorario(HorarioDisponivel horario) {
-        if (horario != null && !horarios.contains(horario)) {
+        if (horario != null && !horarios.contains(horario)){
             horarios.add(horario);
         }
     }
 
-    public boolean removerHorario(HorarioDisponivel horario) {
+    public boolean removerHorario(HorarioDisponivel horario){
         return horarios.remove(horario);
     }
 
@@ -61,12 +66,13 @@ public abstract class Profissional extends Pessoa {
 
     public void listarHorarios() {
         if (horarios.isEmpty()) {
-            System.out.println("Nenhum horário disponível cadastrado.");
-            return;
+            System.out.println("Nenhum horário disponível cadastrado");
+                return;
         }
 
         for (HorarioDisponivel horario : horarios) {
-            System.out.println("- " + horario);
+        
+            System.out.println("-" + horario);
         }
     }
 
@@ -133,7 +139,7 @@ class Fisioterapeuta extends Profissional {
             if (atendimento.observacoes == null || atendimento.observacoes.isEmpty()) {
                 atendimento.observacoes = "[Fisioterapia]";
             } else {
-                atendimento.observacoes += "[Fisioterapia]";
+                atendimento.observacoes += " [Fisioterapia]";
             }
         }
     }
