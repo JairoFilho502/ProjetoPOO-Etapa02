@@ -1,11 +1,13 @@
 public class Atendimento {
-    public int indiceConsulta;
-    public String observacoes;
-    public String diagnostico;
-    public String[] procedimentos;
-    public int totalProcedimentos;
 
-    // registro basico - so observacoes
+    // R1: todos os atributos privados
+    private int indiceConsulta;
+    private String observacoes;
+    private String diagnostico;
+    private String[] procedimentos;
+    private int totalProcedimentos;
+
+    // SOBRECARGA de construtores (R4)
     public Atendimento(int indiceConsulta, String observacoes) {
         this.indiceConsulta = indiceConsulta;
         this.observacoes = observacoes;
@@ -22,7 +24,6 @@ public class Atendimento {
         this.totalProcedimentos = 0;
     }
 
-    // registro completo com procedimentos ja definidos
     public Atendimento(int indiceConsulta, String observacoes, String diagnostico,
                        String[] procedimentos, int totalProcedimentos) {
         this.indiceConsulta = indiceConsulta;
@@ -35,7 +36,17 @@ public class Atendimento {
         }
     }
 
-    // adiciona um por vez
+    // R1: getters
+    public int getIndiceConsulta() { return indiceConsulta; }
+    public String getObservacoes() { return observacoes; }
+    public String getDiagnostico() { return diagnostico; }
+    public int getTotalProcedimentos() { return totalProcedimentos; }
+
+    // R1: setters (observacoes é acessado por Fisioterapeuta, Psicologo e Nutricionista)
+    public void setObservacoes(String observacoes) { this.observacoes = observacoes; }
+    public void setDiagnostico(String diagnostico) { this.diagnostico = diagnostico; }
+
+    // SOBRECARGA de adicionarProcedimento (R4)
     public void adicionarProcedimento(String procedimento) {
         if (totalProcedimentos < 10) {
             procedimentos[totalProcedimentos] = procedimento;
@@ -43,7 +54,6 @@ public class Atendimento {
         }
     }
 
-    // adiciona varios de uma vez
     public void adicionarProcedimento(String[] procs, int quantidade) {
         for (int i = 0; i < quantidade; i++) {
             if (totalProcedimentos < 10) {
@@ -56,17 +66,15 @@ public class Atendimento {
     public String exibirResumo() {
         String resumo = "Observacoes: " + observacoes;
 
-        if (!diagnostico.equals("")) {
-            resumo = resumo + "\nDiagnostico: " + diagnostico;
+        if (!diagnostico.isEmpty()) {
+            resumo += "\nDiagnostico: " + diagnostico;
         }
 
         if (totalProcedimentos > 0) {
-            resumo = resumo + "\nProcedimentos: ";
+            resumo += "\nProcedimentos: ";
             for (int i = 0; i < totalProcedimentos; i++) {
-                resumo = resumo + procedimentos[i];
-                if (i < totalProcedimentos - 1) {
-                    resumo = resumo + ", ";
-                }
+                resumo += procedimentos[i];
+                if (i < totalProcedimentos - 1) resumo += ", ";
             }
         }
         return resumo;
