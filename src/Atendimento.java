@@ -1,80 +1,63 @@
+
 public class Atendimento implements Exportavel {
     public int indiceConsulta;
-    public String observacoes;
-    public String diagnostico;
-    public String[] procedimentos;
-    public int totalProcedimentos;
+    
+    // R8: COMPOSIÇÃO - Atendimento gerencia o ciclo de vida de Prontuario
+    public Prontuario prontuario;
 
-    // registro basico - so observacoes
     public Atendimento(int indiceConsulta, String observacoes) {
         this.indiceConsulta = indiceConsulta;
-        this.observacoes = observacoes;
-        this.diagnostico = "";
-        this.procedimentos = new String[10];
-        this.totalProcedimentos = 0;
+        // COMPOSIÇÃO: Prontuário é instanciado exclusivamente aqui dentro
+        this.prontuario = new Prontuario(observacoes, "", "27/06/2026");
     }
 
     public Atendimento(int indiceConsulta, String observacoes, String diagnostico) {
         this.indiceConsulta = indiceConsulta;
-        this.observacoes = observacoes;
-        this.diagnostico = diagnostico;
-        this.procedimentos = new String[10];
-        this.totalProcedimentos = 0;
+        // COMPOSIÇÃO: Prontuário só existe dentro de Atendimento se Atendimento for removido, Prontuário também é.
+        this.prontuario = new Prontuario(observacoes, diagnostico, "27/06/2026");
     }
 
-    // registro completo com procedimentos ja definidos
-    public Atendimento(int indiceConsulta, String observacoes, String diagnostico,
-                       String[] procedimentos, int totalProcedimentos) {
+    // Construtor legado dos teus colegas adaptado para salvar na List do Prontuário (R10)
+    public Atendimento(int indiceConsulta, String observacoes, String diagnostico, String[] procedimentosAntigos, int total) {
         this.indiceConsulta = indiceConsulta;
-        this.observacoes = observacoes;
-        this.diagnostico = diagnostico;
-        this.procedimentos = new String[10];
-        this.totalProcedimentos = totalProcedimentos;
-        for (int i = 0; i < totalProcedimentos; i++) {
-            this.procedimentos[i] = procedimentos[i];
+        // COMPOSIÇÃO: Prontuário só existe dentro de Atendimento se Atendimento for removido, Prontuário também é.
+        this.prontuario = new Prontuario(observacoes, diagnostico, "27/06/2026");
+        
+        for (int i = 0; i < total; i++) {
+            this.prontuario.procedimentos.add(procedimentosAntigos[i]);
         }
     }
 
-    // adiciona um por vez
     public void adicionarProcedimento(String procedimento) {
-        if (totalProcedimentos < 10) {
-            procedimentos[totalProcedimentos] = procedimento;
-            totalProcedimentos++;
+        if (this.prontuario != null) {
+            this.prontuario.procedimentos.add(procedimento);
         }
     }
 
-    // adiciona varios de uma vez
+    // SOBRECARGA: Mantendo o método antigo de adicionar vários procedimentos por segurança (R4)
     public void adicionarProcedimento(String[] procs, int quantidade) {
-        for (int i = 0; i < quantidade; i++) {
-            if (totalProcedimentos < 10) {
-                procedimentos[totalProcedimentos] = procs[i];
-                totalProcedimentos++;
+        if (this.prontuario != null) {
+            for (int i = 0; i < quantidade; i++) {
+                this.prontuario.procedimentos.add(procs[i]);
             }
         }
     }
 
     public String exibirResumo() {
-        String resumo = "Observacoes: " + observacoes;
-
-        if (!diagnostico.equals("")) {
-            resumo = resumo + "\nDiagnostico: " + diagnostico;
+        if (prontuario == null) return "Sem prontuário.";
+        String resumo = "Observacoes: " + prontuario.observacoes;
+        if (!prontuario.diagnostico.equals("")) {
+            resumo += "\nDiagnostico: " + prontuario.diagnostico;
         }
-
-        if (totalProcedimentos > 0) {
-            resumo = resumo + "\nProcedimentos: ";
-            for (int i = 0; i < totalProcedimentos; i++) {
-                resumo = resumo + procedimentos[i];
-                if (i < totalProcedimentos - 1) {
-                    resumo = resumo + ", ";
-                }
-            }
+        if (!prontuario.procedimentos.isEmpty()) {
+            resumo += "\nProcedimentos: " + String.join(", ", prontuario.procedimentos);
         }
         return resumo;
     }
+
     @Override
     public String exportarDados() {
-        // Implementação obrigatória da interface Exportavel
-        // Por agora retorna algo simples
-        return "Atendimento | Observações: " + observacoes;
+        // Requisito R7: Implementação obrigatória da interface Exportavel
+        return "Atendimento | Consulta ID: " + indiceConsulta + " | Obs: " + (prontuario != null ? prontuario.observacoes : "N/A");
     }
 }

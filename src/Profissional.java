@@ -1,4 +1,3 @@
-
 // importando bibliotecas de collections
 import java.util.ArrayList;
 import java.util.List;
@@ -16,8 +15,8 @@ public abstract class Profissional extends Pessoa{
     // só nome e especialidade
     // adaptado para chamar nome e inicializar lista
     public Profissional(String nome, String especialidade, String registroProfissional, double valorConsulta){
-        super(nome); //chamando o construtor da superclasse Pessoa
-
+        super(nome); // Corrigido: A classe Pessoa só pede o nome!
+        
         this.especialidade = especialidade;
         this.registroProfissional = registroProfissional;
         this.valorConsulta = valorConsulta;
@@ -132,14 +131,14 @@ class Fisioterapeuta extends Profissional {
         return super.exibirResumo() + " | Sessões Previstas: " + totalSessoesPrevistas;
     }
 
-    // override de registrarEspecifico
+    // override obrigatório de registro específico
     @Override
     public void registrarEspecifico(Atendimento atendimento) {
-        if (atendimento != null) {
-            if (atendimento.observacoes == null || atendimento.observacoes.isEmpty()) {
-                atendimento.observacoes = "[Fisioterapia]";
+        if (atendimento != null && atendimento.prontuario != null) {
+            if (atendimento.prontuario.observacoes == null || atendimento.prontuario.observacoes.isEmpty()) {
+                atendimento.prontuario.observacoes = "[Fisioterapia]";
             } else {
-                atendimento.observacoes += " [Fisioterapia]";
+                atendimento.prontuario.observacoes += " [Fisioterapia]";
             }
         }
     }
@@ -161,23 +160,22 @@ class Psicologo extends Profissional {
         return super.exibirResumo() + " | Abordagem: " + abordagem;
     }
 
-    // override obrigatório de registro específico
+// override de registrarEspecifico
     @Override
     public void registrarEspecifico(Atendimento atendimento) {
-        if (atendimento != null) {
+        if (atendimento != null && atendimento.prontuario != null) {
             String info = "[Psicologia - " + this.abordagem + "]";
-            if (atendimento.observacoes == null || atendimento.observacoes.isEmpty()) {
-                atendimento.observacoes = info;
+            if (atendimento.prontuario.observacoes == null || atendimento.prontuario.observacoes.isEmpty()) {
+                atendimento.prontuario.observacoes = info;
             } else {
-                atendimento.observacoes += " " + info;
+                atendimento.prontuario.observacoes += " " + info;
             }
         }
     }
 }
 
 // classe dos nutricionistas
-
- class Nutricionista extends Profissional {
+class Nutricionista extends Profissional {
     public String focoPlanoNutricional;
 
       public Nutricionista(String nome, String registroProfissional, double valorConsulta, String focoPlanoNutricional) {  
@@ -185,26 +183,21 @@ class Psicologo extends Profissional {
         this.focoPlanoNutricional = focoPlanoNutricional;
     }
 
-
     // override de exibirResumo
-
     @Override
     public String exibirResumo() {
         return super.exibirResumo() + " | Foco Nutricional: " + focoPlanoNutricional;
     }
 
-
-
-    // override obrigatório de registro específico
-
+// override de registrarEspecifico
     @Override
     public void registrarEspecifico(Atendimento atendimento) {
-        if (atendimento != null) {
-            String info =  "[Nutrição -- Foco: " + focoPlanoNutricional + "]";
-            if ( atendimento.observacoes == null || atendimento.observacoes.isEmpty()) {
-                atendimento.observacoes = info;
+        if (atendimento != null && atendimento.prontuario != null) {
+            String info = "[Nutrição -- Foco: " + this.focoPlanoNutricional + "]";
+            if (atendimento.prontuario.observacoes == null || atendimento.prontuario.observacoes.isEmpty()) {
+                atendimento.prontuario.observacoes = info;
             } else {
-                atendimento.observacoes += " " + info;
+                atendimento.prontuario.observacoes += " " + info;
             }
         }
     }
