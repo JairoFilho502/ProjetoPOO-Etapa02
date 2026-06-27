@@ -69,7 +69,7 @@ public class Relatorio {
         }
 
         for (int i = 0; i < totalPagamentos; i++) {
-            totalFaturado = totalFaturado + pagamentos[i].valorFinal;
+        //    totalFaturado = totalFaturado + pagamentos[i].valorFinal;
         }
 
         for (int i = 0; i < totalMultas; i++) {

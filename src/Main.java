@@ -732,22 +732,34 @@ public class Main {
     // ---- PAGAMENTOS ----
 
     public static void menuPagamentos() {
-        int op = -1;
+        int op = -1; 
         while (op != 0) {
-            System.out.println("\n--- PAGAMENTOS ---");
+            System.out.println("\n PAGAMENTOS ");
             System.out.println("1 - Pagamento direto");
             System.out.println("2 - Pagamento automatico");
-            System.out.println("3 - Listar pagamentos");
+            System.out.println("3 - Listar pagamentos (Teste Polimórfico)");
             System.out.println("0 - Voltar");
-            System.out.print("Opcao: ");
+            System.out.println("Opcao:");
             op = Integer.parseInt(sc.nextLine());
 
             switch (op) {
                 case 1: pagamentoDireto(); break;
                 case 2: pagamentoAutomatico(); break;
-                case 3: listarPagamentos(); break;
-                case 0: break;
-                default: System.out.println("Opcao invalida!"); break;
+                case 3: 
+                // adicionando polimorfismo (integrante 5 do Victor)
+                System.out.println("\n LISTAGEM DE PAGAMENTOS EM REVISÃO ");
+                Pagamento[] pagamentosDoDia = new Pagamento[3];
+                pagamentosDoDia[0] = new PagamentoDinheiro(101, 150.0);
+                pagamentosDoDia[1] = new PagamentoCartao(102, 200.0, 4); 
+                pagamentosDoDia[2] = new PagamentoConvenio(103, 300.0, "Pediatria", 0.4);
+
+                for (Pagamento p : pagamentosDoDia) {
+                    System.out.println(p.exibirResumo());
+                }
+                System.out.println("==========================================");
+                break; 
+            case 0: break; 
+            default: System.out.println("Opcao invalida!"); break;
             }
         }
     }
@@ -783,7 +795,7 @@ public class Main {
         System.out.println("Pagamento registrado!");
     }
 
-    public static void pagamentoAutomatico() {
+     public static void pagamentoAutomatico() {
         System.out.print("Indice da consulta: ");
         int idxConsulta = Integer.parseInt(sc.nextLine());
 
