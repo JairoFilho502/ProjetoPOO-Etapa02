@@ -1,4 +1,4 @@
-rt java.util.ArrayList;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -7,33 +7,59 @@ import java.util.Set;
 
 public class ClinicaServico {
 
-    // R10: ArrayList<Paciente> — mantém ordem de inserção; acesso por índice O(1); tamanho dinâmico
-    private List<Paciente> pacientes = new ArrayList<>();
+    // ===================== R10 — INFRAESTRUTURA DE COLEÇÕES =====================
 
-    // R10: ArrayList<Profissional> — suporta hierarquia polimórfica (Fisioterapeuta, Psicologo, etc.)
-    private List<Profissional> profissionais = new ArrayList<>();
+    private List<Paciente>     pacientes          = new ArrayList<>();
+    private List<Profissional> profissionais      = new ArrayList<>();
+    private List<Consulta>     consultas          = new ArrayList<>();
+    private List<Atendimento>  atendimentos       = new ArrayList<>();
+    private List<Pagamento>    pagamentos         = new ArrayList<>();
+    private List<Pessoa>       pessoasCadastradas = new ArrayList<>();
+    private Set<String>                cpfsCadastrados    = new HashSet<>();
+    private Map<String, Paciente>      pacientesPorCpf    = new HashMap<>();
+    private Map<String, Profissional>  profissionaisPorNome = new HashMap<>();
+    private List<Double>       multas             = new ArrayList<>();
 
-    // R10: ArrayList<Consulta> — lista editável; remarcação cria nova consulta preservando histórico
-    private List<Consulta> consultas = new ArrayList<>();
+    // ===================== PACIENTES =====================
 
-    // R10: ArrayList<Atendimento> — histórico clínico ordenado cronologicamente por inserção
-    private List<Atendimento> atendimentos = new ArrayList<>();
+    public void cadastrarPaciente(String nome, String cpf) {
+        // R10: HashSet.add() retorna false automaticamente se CPF já existe — O(1), sem loop
+        if (!cpfsCadastrados.add(cpf)) {
+            throw new IllegalArgumentException("CPF " + cpf + " já cadastrado no sistema.");
+        }
+        Paciente p = new Paciente(nome, cpf);
+        pacientes.add(p);
+        pessoasCadastradas.add(p);   // lista unificada para relatório polimórfico
+        pacientesPorCpf.put(cpf, p); // índice rápido para busca O(1)
+    }
 
-    // R10: ArrayList<Pagamento> — acesso polimórfico por calcularValorFinal() (ligação dinâmica)
-    private List<Pagamento> pagamentos = new ArrayList<>();
+    // SOBRECARGA: complementar sem convênio (R4)
+    // SOBRECARGA: mesmo nome, parâmetros diferentes (resolvido em tempo de compilação)
+    public void complementarPaciente(String cpf, int idade, String telefone)
+            throws PacienteNaoEncontradoException {
+        buscarPaciente(cpf).complementar(idade, telefone);
+    }
 
-    // R10: ArrayList<Pessoa> — lista UNIFICADA de todos os cadastrados (Paciente + Profissional)
-    private List<Pessoa> pessoasCadastradas = new ArrayList<>();
+    // SOBRECARGA: complementar com convênio (R4)
+    public void complementarPaciente(String cpf, int idade, String telefone, String nomeConvenio)
+            throws PacienteNaoEncontradoException {
+        buscarPaciente(cpf).complementar(idade, telefone, nomeConvenio);
+    }
 
-    // R10: HashSet<String> — controle de CPFs únicos; add() e contains() em O(1); previne duplicatas
-    private Set<String> cpfsCadastrados = new HashSet<>();
+    // Jornada 27: busca rápida O(1) via HashMap — sem percorrer ArrayList
+    public Paciente buscarPaciente(String cpf) throws PacienteNaoEncontradoException {
+        Paciente p = pacientesPorCpf.get(cpf);
+        if (p == null) {
+            throw new PacienteNaoEncontradoException("CPF " + cpf + " não encontrado no sistema.");
+        }
+        return p;
+    }
 
-    // R10: HashMap<CPF, Paciente> — busca direta por CPF em O(1) sem percorrer lista (Jornada 27)
-    private Map<String, Paciente> pacientesPorCpf = new HashMap<>();
+    public void desativarPaciente(String cpf) throws PacienteNaoEncontradoException {
+        buscarPaciente(cpf).desativar();
+    }
 
-    // R10: HashMap<Nome, Profissional> — busca por nome em O(1); necessária para agendamento rápido
-    private Map<String, Profissional> profissionaisPorNome = new HashMap<>();
-
-    // Registro financeiro de multas.
-    private List<Double> multas = new ArrayList<>();
+    public List<Paciente> listarPacientes() {
+        return new ArrayList<>(pacientes); // cópia defensiva
+    }
 }
