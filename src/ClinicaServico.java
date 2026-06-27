@@ -173,7 +173,7 @@ public class ClinicaServico {
             int hC = Integer.parseInt(horario.substring(0, 2));
             int hA = Integer.parseInt(horaAtual.substring(0, 2));
             if (hC - hA < 2) { multa = 50.0; multas.add(multa); }
-        } catch (NumberFormatException e) { /* formato inválido — cancela sem multa */ }
+        } catch (NumberFormatException e) { /* cancela sem multa */ }
         if (motivo == null || motivo.isEmpty()) c.cancelar();
         else c.cancelar(motivo);
         return multa;
@@ -249,6 +249,78 @@ public class ClinicaServico {
         return atendimentos.get(atendimentos.size() - 1);
     }
 
+    // ===================== PAGAMENTOS =====================
+
+    public Pagamento processarPagamento(int idxConsulta, double valor, String tipo)
+            throws ConsultaNaoEncontradaException, PagamentoInvalidoException,
+                   ConvenioNaoCobreException, PacienteNaoEncontradoException,
+                   ProfissionalNaoEncontradoException {
+
+        if (idxConsulta < 0 || idxConsulta >= consultas.size())
+            throw new ConsultaNaoEncontradaException("Índice de consulta inválido: " + idxConsulta);
+        if (valor < 0) throw new PagamentoInvalidoException(
+                "Valor não pode ser negativo: R$" + String.format("%.2f", valor));
+
+        Pagamento pg;
+        switch (tipo.toLowerCase()) {
+            case "dinheiro":
+            case "pix":
+                // LIGAÇÃO DINÂMICA: calcularValorFinal() em PagamentoDinheiro aplica 5% de desconto
+                pg = new PagamentoDinheiro(idxConsulta, valor);
+                break;
+
+            case "cartao":
+                // calcularValorFinal(): até 3x sem taxa; 4x–6x: +2,5% por parcela extra
+                pg = new PagamentoCartao(idxConsulta, valor, 1);
+                break;
+
+            case "convenio":
+                // calcularValorFinal(): aplica percentualCobertura real do convênio (R8 ASSOCIAÇÃO)
+                Consulta c = consultas.get(idxConsulta);
+                Paciente pac = buscarPaciente(c.getCpfPaciente());
+                Convenio convenio = pac.getConvenio();
+                if (convenio == null) throw new PagamentoInvalidoException(
+                        "Paciente não possui convênio cadastrado.");
+                Profissional prof = buscarProfissional(c.getNomeProfissional());
+                if (!convenio.cobreespecialidade(prof.getEspecialidade()))
+                    throw new ConvenioNaoCobreException(
+                            "Convênio " + convenio.getNome()
+                            + " não cobre a especialidade: " + prof.getEspecialidade()
+                            + ". Especialidades cobertas: " + convenio.getEspecialidadesCobertas());
+                pg = new PagamentoConvenio(idxConsulta, valor, convenio);
+                break;
+
+            default:
+                throw new PagamentoInvalidoException(
+                        "Forma inválida: '" + tipo + "'. Válidas: dinheiro, pix, cartao, convenio.");
+        }
+
+        pagamentos.add(pg);
+        return pg;
+    }
+
+    // Calcula valor com descontos automáticos usando dados reais do sistema
+    public double calcularValorAutomatico(int idxConsulta, double multaExtra)
+            throws ConsultaNaoEncontradaException, PacienteNaoEncontradoException,
+                   ProfissionalNaoEncontradoException {
+        if (idxConsulta < 0 || idxConsulta >= consultas.size())
+            throw new ConsultaNaoEncontradaException("Índice inválido: " + idxConsulta);
+        Consulta c     = consultas.get(idxConsulta);
+        Profissional p = buscarProfissional(c.getNomeProfissional());
+        Paciente pac   = buscarPaciente(c.getCpfPaciente());
+        double valorBase = p.getValorConsulta();
+        double desconto  = 0;
+        if (c.getTipo().equals("retorno")) desconto += 20;
+        Convenio convenio = pac.getConvenio();
+        if (convenio != null) {
+            // percentualCobertura: 0.40 (SaúdePlus), 0.30 (VidaMais), 0.50 (BemEstar)
+            desconto += convenio.getPercentualCobertura() * 100;
+        }
+        return valorBase * (1.0 - desconto / 100.0) + multaExtra;
+    }
+
+    public List<Pagamento> listarPagamentos() { return new ArrayList<>(pagamentos); }
+
     // ===================== MÉTODOS PRIVADOS =====================
 
     private boolean verificarConflito(String nomeProf, String data, String horario) {
@@ -271,16 +343,16 @@ public class ClinicaServico {
                     && (statusFiltro == null || c.getStatus().equals(statusFiltro))) return c;
         }
         throw new ConsultaNaoEncontradaException(
-                "Nenhum agendamento encontrado para CPF " + cpf + " em " + data + " às " + horario + ".");
+                "Nenhum agendamento para CPF " + cpf + " em " + data + " às " + horario + ".");
     }
 
     private Consulta validarConsultaParaAtendimento(int idx)
             throws ConsultaNaoEncontradaException, OperacaoInvalidaException {
         if (idx < 0 || idx >= consultas.size())
-            throw new ConsultaNaoEncontradaException("Índice de consulta inválido: " + idx);
+            throw new ConsultaNaoEncontradaException("Índice inválido: " + idx);
         Consulta c = consultas.get(idx);
         if (!c.getStatus().equals("agendada")) throw new OperacaoInvalidaException(
-                "Registro de atendimento exige status 'agendada'. Atual: " + c.getStatus());
+                "Exige status 'agendada'. Atual: " + c.getStatus());
         return c;
     }
 
