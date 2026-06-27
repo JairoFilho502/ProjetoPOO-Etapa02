@@ -13,19 +13,18 @@ public class PagamentoCartao extends Pagamento {
     public void setParcelas(int parcelas) {
         this.parcelas = parcelas; 
     }
-    @Override
+    @Override  
     public double calcularValorFinal() {
-        if (parcelas <1 || parcelas >6) {
-            System.out.println("Erro: Parcelamento inválido. O número de parcelas deve estar entre 1 e 6.");
-            return 0.0;
+        //aplicando excecao aqui se as parcelas forem invalidas
+        if(parcelas <1 || parcelas > 6) {
+            throw new PagamentoInvalidoException("Erro: O número de parcelas deve ser entre 1x e 6x" + " Tentativa de" + parcelas + "x");
         }
         if (parcelas <=3) {
-            return getValorBase(); 
+            return getValorBase();
         }
         int parcelasExtras = parcelas - 3;
-        double taxaJuros = parcelasExtras * 0.025; 
+        double taxaJuros = parcelasExtras * 0.025;
 
-        double valorFinal = getValorBase() + (getValorBase() * taxaJuros);
-        return valorFinal; 
+        return getValorBase() + (getValorBase() * taxaJuros); 
     }
 }

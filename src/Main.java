@@ -750,7 +750,7 @@ public class Main {
                 System.out.println("\n LISTAGEM DE PAGAMENTOS EM REVISÃO ");
                 Pagamento[] pagamentosDoDia = new Pagamento[3];
                 pagamentosDoDia[0] = new PagamentoDinheiro(101, 150.0);
-                pagamentosDoDia[1] = new PagamentoCartao(102, 200.0, 4); 
+                pagamentosDoDia[1] = new PagamentoCartao(102, 200.0, 8); 
                 pagamentosDoDia[2] = new PagamentoConvenio(103, 300.0, "Pediatria", 0.4);
 
                 for (Pagamento p : pagamentosDoDia) {
