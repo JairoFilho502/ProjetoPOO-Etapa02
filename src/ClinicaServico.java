@@ -53,19 +53,15 @@ public class ClinicaServico {
         buscarPaciente(cpf).desativar();
     }
 
-    public List<Paciente> listarPacientes() {
-        return new ArrayList<>(pacientes);
-    }
+    public List<Paciente> listarPacientes() { return new ArrayList<>(pacientes); }
 
     // ===================== PROFISSIONAIS =====================
 
     public void cadastrarProfissional(String nome, String especialidade,
                                       String registro, double valor) {
         if (!Profissional.especialidadeValida(especialidade)) {
-            throw new IllegalArgumentException("Especialidade inválida: " + especialidade
-                    + ". Válidas: clinica geral, fisioterapia, psicologia, nutricao.");
+            throw new IllegalArgumentException("Especialidade inválida: " + especialidade);
         }
-        // Profissional é abstrata — instancia a subclasse correta (polimorfismo)
         Profissional novo;
         switch (especialidade.toLowerCase()) {
             case "fisioterapia": novo = new Fisioterapeuta(nome, registro, valor, 0); break;
@@ -87,26 +83,21 @@ public class ClinicaServico {
 
     public void adicionarHorarioProfissional(String nome, String dia, String periodo)
             throws ProfissionalNaoEncontradoException {
-        // AGREGAÇÃO: HorarioDisponivel existe independentemente do Profissional (R8)
         buscarProfissional(nome).adicionarHorario(new HorarioDisponivel(dia, periodo));
     }
 
-    // SOBRECARGA: atualizar sem redefinir horários (R4)
     public void atualizarProfissional(String nome, String registro, double valor)
             throws ProfissionalNaoEncontradoException {
         buscarProfissional(nome).atualizar(registro, valor);
     }
 
-    // SOBRECARGA: atualizar substituindo lista de horários (R4)
     public void atualizarProfissional(String nome, String registro, double valor,
                                        List<HorarioDisponivel> horarios)
             throws ProfissionalNaoEncontradoException {
         buscarProfissional(nome).atualizar(registro, valor, horarios);
     }
 
-    public List<Profissional> listarProfissionais() {
-        return new ArrayList<>(profissionais);
-    }
+    public List<Profissional> listarProfissionais() { return new ArrayList<>(profissionais); }
 
     public List<Profissional> filtrarPorEspecialidade(String especialidade) {
         List<Profissional> resultado = new ArrayList<>();
@@ -114,5 +105,196 @@ public class ClinicaServico {
             if (p.getEspecialidade().equalsIgnoreCase(especialidade)) resultado.add(p);
         }
         return resultado;
+    }
+
+    // ===================== CONSULTAS =====================
+
+    public void agendarConsulta(String cpfPac, String nomeProf, String data, String horario)
+            throws PacienteNaoEncontradoException, PacienteInativoException,
+                   ProfissionalNaoEncontradoException, HorarioIndisponivelException {
+        agendarConsulta(cpfPac, nomeProf, data, horario, "inicial");
+    }
+
+    public void agendarConsulta(String cpfPac, String nomeProf, String data,
+                                String horario, String tipo)
+            throws PacienteNaoEncontradoException, PacienteInativoException,
+                   ProfissionalNaoEncontradoException, HorarioIndisponivelException {
+        Paciente pac = buscarPaciente(cpfPac);
+        if (!pac.isAtivo()) throw new PacienteInativoException(
+                "Paciente " + pac.getNome() + " está inativo.");
+        Profissional prof = buscarProfissional(nomeProf);
+        String diaSemana = calcularDiaSemana(data);
+        if (!prof.atendeNoDia(diaSemana)) throw new HorarioIndisponivelException(
+                prof.getNome() + " não possui expediente no dia " + diaSemana + ".");
+        if (verificarConflito(nomeProf, data, horario)) throw new HorarioIndisponivelException(
+                "Horário " + horario + " já está ocupado para " + nomeProf + " em " + data + ".");
+        consultas.add(new Consulta(cpfPac, nomeProf, data, horario, tipo));
+    }
+
+    public void agendarPorEspecialidade(String cpfPac, String especialidade,
+                                         String data, String horario)
+            throws PacienteNaoEncontradoException, PacienteInativoException,
+                   ProfissionalNaoEncontradoException, HorarioIndisponivelException {
+        Paciente pac = buscarPaciente(cpfPac);
+        if (!pac.isAtivo()) throw new PacienteInativoException(
+                "Paciente " + pac.getNome() + " está inativo.");
+        String diaSemana = calcularDiaSemana(data);
+        Profissional escolhido = null;
+        for (Profissional p : profissionais) {
+            if (p.getEspecialidade().equalsIgnoreCase(especialidade)
+                    && p.atendeNoDia(diaSemana)
+                    && !verificarConflito(p.getNome(), data, horario)) {
+                escolhido = p; break;
+            }
+        }
+        if (escolhido == null) throw new ProfissionalNaoEncontradoException(
+                "Nenhum profissional de " + especialidade + " disponível em " + data + " às " + horario + ".");
+        consultas.add(new Consulta(cpfPac, escolhido.getNome(), data, horario));
+    }
+
+    public String sugerirHorario(String nomeProf, String data) {
+        for (int h = 8; h <= 18; h++) {
+            String teste = (h < 10 ? "0" + h : "" + h) + ":00";
+            if (!verificarConflito(nomeProf, data, teste)) return teste;
+        }
+        return "";
+    }
+
+    public double cancelarConsulta(String cpf, String data, String horario,
+                                    String horaAtual, String motivo)
+            throws ConsultaNaoEncontradaException, OperacaoInvalidaException {
+        Consulta c = buscarConsultaPorChave(cpf, data, horario, null);
+        if (c.getStatus().equals("realizada"))
+            throw new OperacaoInvalidaException("Consultas concluídas não podem ser canceladas.");
+        if (c.getStatus().equals("cancelada"))
+            throw new OperacaoInvalidaException("A consulta já está cancelada.");
+        double multa = 0;
+        try {
+            int hC = Integer.parseInt(horario.substring(0, 2));
+            int hA = Integer.parseInt(horaAtual.substring(0, 2));
+            if (hC - hA < 2) { multa = 50.0; multas.add(multa); }
+        } catch (NumberFormatException e) { /* formato inválido — cancela sem multa */ }
+        if (motivo == null || motivo.isEmpty()) c.cancelar();
+        else c.cancelar(motivo);
+        return multa;
+    }
+
+    public void remarcarConsulta(String cpf, String dataOrig, String horarioOrig,
+                                  String novaData, String novoHorario)
+            throws ConsultaNaoEncontradaException, HorarioIndisponivelException,
+                   ProfissionalNaoEncontradoException {
+        Consulta c = buscarConsultaPorChave(cpf, dataOrig, horarioOrig, "agendada");
+        String nomeProf = c.getNomeProfissional();
+        if (!novaData.equals(dataOrig)) {
+            Profissional prof = profissionaisPorNome.get(nomeProf);
+            if (prof != null) {
+                String dia = calcularDiaSemana(novaData);
+                if (!prof.atendeNoDia(dia)) throw new HorarioIndisponivelException(
+                        "Profissional não possui expediente no dia " + dia + ".");
+            }
+        }
+        if (verificarConflito(nomeProf, novaData, novoHorario)) throw new HorarioIndisponivelException(
+                "Horário " + novoHorario + " já está ocupado em " + novaData + ".");
+        c.remarcar();
+        consultas.add(new Consulta(cpf, nomeProf, novaData, novoHorario, c.getTipo()));
+    }
+
+    public List<Consulta> listarConsultas() { return new ArrayList<>(consultas); }
+
+    public List<Consulta> buscarConsultasPorPaciente(String cpf)
+            throws PacienteNaoEncontradoException {
+        buscarPaciente(cpf);
+        List<Consulta> resultado = new ArrayList<>();
+        for (Consulta c : consultas) if (c.getCpfPaciente().equals(cpf)) resultado.add(c);
+        return resultado;
+    }
+
+    public Consulta buscarConsulta(String cpf, String data, String horario)
+            throws ConsultaNaoEncontradaException {
+        return buscarConsultaPorChave(cpf, data, horario, null);
+    }
+
+    // ===================== ATENDIMENTOS =====================
+
+    // SOBRECARGA: registrar apenas com observações (R4)
+    public void registrarAtendimento(int idxConsulta, String obs, String dataRegistro)
+            throws ConsultaNaoEncontradaException, OperacaoInvalidaException {
+        Consulta c = validarConsultaParaAtendimento(idxConsulta);
+        atendimentos.add(new Atendimento(idxConsulta, obs, dataRegistro));
+        c.realizar();
+    }
+
+    // SOBRECARGA: registrar com diagnóstico (R4)
+    public void registrarAtendimento(int idxConsulta, String obs, String diagnostico,
+                                     String dataRegistro)
+            throws ConsultaNaoEncontradaException, OperacaoInvalidaException {
+        Consulta c = validarConsultaParaAtendimento(idxConsulta);
+        atendimentos.add(new Atendimento(idxConsulta, obs, diagnostico, dataRegistro));
+        c.realizar();
+    }
+
+    // SOBRECARGA: registrar completo com procedimentos (R4)
+    public void registrarAtendimentoCompleto(int idxConsulta, String obs, String diagnostico,
+                                              String dataRegistro, String[] procedimentos, int qtd)
+            throws ConsultaNaoEncontradaException, OperacaoInvalidaException {
+        Consulta c = validarConsultaParaAtendimento(idxConsulta);
+        Atendimento at = new Atendimento(idxConsulta, obs, diagnostico, dataRegistro);
+        at.adicionarProcedimentos(procedimentos, qtd);
+        atendimentos.add(at);
+        c.realizar();
+    }
+
+    public Atendimento getUltimoAtendimento() {
+        if (atendimentos.isEmpty()) return null;
+        return atendimentos.get(atendimentos.size() - 1);
+    }
+
+    // ===================== MÉTODOS PRIVADOS =====================
+
+    private boolean verificarConflito(String nomeProf, String data, String horario) {
+        for (Consulta c : consultas) {
+            if (c.getNomeProfissional().equals(nomeProf)
+                    && c.getData().equals(data)
+                    && c.getHorario().equals(horario)
+                    && c.getStatus().equals("agendada")) return true;
+        }
+        return false;
+    }
+
+    private Consulta buscarConsultaPorChave(String cpf, String data, String horario,
+                                             String statusFiltro)
+            throws ConsultaNaoEncontradaException {
+        for (Consulta c : consultas) {
+            if (c.getCpfPaciente().equals(cpf)
+                    && c.getData().equals(data)
+                    && c.getHorario().equals(horario)
+                    && (statusFiltro == null || c.getStatus().equals(statusFiltro))) return c;
+        }
+        throw new ConsultaNaoEncontradaException(
+                "Nenhum agendamento encontrado para CPF " + cpf + " em " + data + " às " + horario + ".");
+    }
+
+    private Consulta validarConsultaParaAtendimento(int idx)
+            throws ConsultaNaoEncontradaException, OperacaoInvalidaException {
+        if (idx < 0 || idx >= consultas.size())
+            throw new ConsultaNaoEncontradaException("Índice de consulta inválido: " + idx);
+        Consulta c = consultas.get(idx);
+        if (!c.getStatus().equals("agendada")) throw new OperacaoInvalidaException(
+                "Registro de atendimento exige status 'agendada'. Atual: " + c.getStatus());
+        return c;
+    }
+
+    private String calcularDiaSemana(String data) {
+        try {
+            int dia = Integer.parseInt(data.substring(0, 2));
+            int mes = Integer.parseInt(data.substring(3, 5));
+            int ano = Integer.parseInt(data.substring(6, 10));
+            if (mes < 3) { mes += 12; ano--; }
+            int k = ano % 100, j = ano / 100;
+            int r = (dia + (13 * (mes + 1)) / 5 + k + k / 4 + j / 4 - 2 * j) % 7;
+            if (r < 0) r += 7;
+            String[] nomes = {"sabado","domingo","segunda","terca","quarta","quinta","sexta"};
+            return nomes[r];
+        } catch (Exception e) { return ""; }
     }
 }
