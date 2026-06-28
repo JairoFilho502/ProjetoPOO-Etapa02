@@ -3,7 +3,7 @@ public class PagamentoConvenio extends Pagamento {
     private double taxaCoberturaTemporaria; 
 
     public PagamentoConvenio(int indiceConsulta, double valorBase, String especialidadeConsulta, double taxaCoberturaTemporaria) {
-        super(indiceConsulta, valorbase); 
+        super(indiceConsulta, valorBase); 
         this.especialidadeConsulta = especialidadeConsulta;
         this.taxaCoberturaTemporaria = taxaCoberturaTemporaria;
     }
