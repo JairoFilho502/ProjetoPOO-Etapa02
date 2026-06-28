@@ -197,5 +197,5 @@ Ezdras Virgulino
 Jairo George
 João Victor Serrano
 José Guilherme Ferreira Alves
-Pedro 
+Pedro Henrique
 Thales Alberto
