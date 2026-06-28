@@ -3,7 +3,10 @@ package model;
 import interfaces.Agendavel;
 import interfaces.Exportavel;
 
+// uma consulta liga o paciente ao profissional num dia e horário específico
 public class Consulta implements Agendavel, Exportavel {
+    // Consulta referencia Paciente e Profissional por identificadores
+    // sem manter referência direta aos objetos
     private String cpfPaciente;
     private String nomeProfissional;
     private String data;
@@ -11,6 +14,7 @@ public class Consulta implements Agendavel, Exportavel {
     private String tipo;
     private String status;
 
+    // construtor padrão, tipo "inicial" e status "agendada"
     public Consulta(String cpfPaciente, String nomeProfissional, String data, String horario) {
         this.cpfPaciente      = cpfPaciente;
         this.nomeProfissional = nomeProfissional;
@@ -20,6 +24,7 @@ public class Consulta implements Agendavel, Exportavel {
         this.status           = "agendada";
     }
 
+    // usuario informa o tipo (inicial, retorno, avaliação)
     public Consulta(String cpfPaciente, String nomeProfissional,
                     String data, String horario, String tipo) {
         this.cpfPaciente      = cpfPaciente;
@@ -30,6 +35,7 @@ public class Consulta implements Agendavel, Exportavel {
         this.status           = "agendada";
     }
 
+    // construtor completo, quando ja se sabe o status
     public Consulta(String cpfPaciente, String nomeProfissional,
                     String data, String horario, String tipo, String status) {
         this.cpfPaciente      = cpfPaciente;
@@ -51,12 +57,15 @@ public class Consulta implements Agendavel, Exportavel {
     public void setHorario(String horario) { if (horario != null) this.horario = horario; }
     public void setStatus(String status)   { if (status != null) this.status = status; }
 
+    // implementacoes da interface Agendavel
     @Override public void agendar()  { this.status = "agendada"; }
     @Override public void cancelar() { this.status = "cancelada"; }
     @Override public void remarcar() { this.status = "remarcada"; }
 
+    // marca a consulta como realizada apos o atendimento
     public void realizar() { this.status = "realizada"; }
 
+    // cancelamento com motivo, retorna mensagem
     public String cancelar(String motivo) {
         this.status = "cancelada";
         return "Consulta cancelada. Motivo: " + motivo;
