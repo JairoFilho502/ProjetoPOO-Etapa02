@@ -1,10 +1,10 @@
-import java.util.ArrayList; // usando bibliotecas collections para usar Lists
+import java.util.ArrayList; // usando bibliotecas collections para chamar a coleção Lists
 import java.util.List;
 
 
 
 
-public abstract class Profissional extends Pessoa{ // hierarquia com a superclasse pessoa
+public abstract class Profissional extends Pessoa{ // chamando a hierarquia com a superclasse pessoa
     private String especialidade;
     private String registroProfissional;
     private double valorConsulta;
@@ -12,13 +12,15 @@ public abstract class Profissional extends Pessoa{ // hierarquia com a superclas
 
     public Profissional(String nome, String especialidade, String registroProfissional, double valorConsulta){
     super(nome);
+
+
         this.especialidade = especialidade;
         this.registroProfissional = registroProfissional;
         this.valorConsulta = valorConsulta;
         this.horarios = new ArrayList<>();
     }
 
-    public String getEspecialidade(){ // usando método getters
+    public String getEspecialidade(){ // usando métodos getters
          return especialidade; }
     public String getRegistroProfissional() { 
         return registroProfissional; }
@@ -34,11 +36,15 @@ public abstract class Profissional extends Pessoa{ // hierarquia com a superclas
         }
     }
 
-    public void atualizar(String registro, double valor, List<HorarioDisponivel>novosHorarios){ // uso de generics para evitar horarios duplicados
-    if (validarRegistro(registro)){    
+    public void atualizar(String registro, double valor, List<HorarioDisponivel> novosHorarios){
+        if (validarRegistro(registro)){
             this.registroProfissional = registro;
             this.valorConsulta = valor;
-            this.horarios = new ArrayList<>(novosHorarios);
+
+            if (novosHorarios != null) {
+                this.horarios = new ArrayList<>(novosHorarios);
+
+            }
         }
     }
 
@@ -53,7 +59,7 @@ public abstract class Profissional extends Pessoa{ // hierarquia com a superclas
     }
 
     public void adicionarHorario(HorarioDisponivel horario) {    
-        if (horario != null && !horarios.contains(horario)) horarios.add(horario);
+        if (horario != null && !horarios.contains(horario)) horarios.add(horario); // evita horarios duplicados
     }
 
     public boolean removerHorario(HorarioDisponivel horario) {
@@ -61,13 +67,17 @@ public abstract class Profissional extends Pessoa{ // hierarquia com a superclas
     }
 
 
-    public void listarHorarios() {
-        if (horarios.isEmpty()) {
-            System.out.println("Não há horário disponível");
+    public void listarHorarios(){
+        if (horarios.isEmpty()){
+            System.out.println("não há horário disponível");
+            return;
         }
-        for (HorarioDisponivel h : horarios) 
+
+    for (HorarioDisponivel h : horarios){
         System.out.println("-" + h);
+    }    
     }
+
 
     public List<HorarioDisponivel>buscarHorariosAlternativos(HorarioDisponivel horarioConflitante) {
     List<HorarioDisponivel> alt = new ArrayList<>();
@@ -79,13 +89,13 @@ public abstract class Profissional extends Pessoa{ // hierarquia com a superclas
 
     public static boolean especialidadeValida(String esp) {
         if (esp == null) return false;
-        return esp.equals("clinico geral") || esp.equals("fisioterapia")
+        return esp.equals("clinico Geral") || esp.equals("fisioterapia")
                 || esp.equals("psicologia") || esp.equals("nutricao");
     }
 
     @Override
     public String exibirResumo() {    
-        return "Nome: " + getNome() + "|Especialidaded: " + especialidade + "|Registro: " + registroProfissional + "|Valor: R$" + valorConsulta + "|Horarios: " + horarios.toString();
+        return "Nome: " + getNome() + "|Especialidade: " + especialidade + "|Registro: " + registroProfissional + "|Valor: R$" + valorConsulta + "|Horarios: " + horarios.toString();
             
     }
 
@@ -93,7 +103,7 @@ public abstract class Profissional extends Pessoa{ // hierarquia com a superclas
 
     protected boolean validarRegistro(String registro) { // uso do modificador de acesso protect
         if (registro == null || registro.isEmpty()) {    
-            System.out.println("Eroo: Registro profissional invalido.");
+            System.out.println("Erro: Registro profissional invalido.");
             return false;
         }
         return true;
