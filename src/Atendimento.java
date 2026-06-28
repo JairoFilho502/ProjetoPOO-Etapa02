@@ -1,63 +1,72 @@
-
 public class Atendimento implements Exportavel {
-    public int indiceConsulta;
-    
-    //  Atendimento gerencia o ciclo de vida de Prontuario
-    public Prontuario prontuario;
+    private int indiceConsulta;
+    private String observacoes;
+    private String diagnostico;
+    private String[] procedimentos;
+    private int totalProcedimentos;
 
     public Atendimento(int indiceConsulta, String observacoes) {
         this.indiceConsulta = indiceConsulta;
-        // Prontuário é instanciado exclusivamente aqui dentro
-        this.prontuario = new Prontuario(observacoes, "", "27/06/2026");
+        this.observacoes = observacoes != null ? observacoes : "";
+        this.diagnostico = "";
+        this.procedimentos = new String[10];
+        this.totalProcedimentos = 0;
     }
 
     public Atendimento(int indiceConsulta, String observacoes, String diagnostico) {
-        this.indiceConsulta = indiceConsulta;
-        // Prontuário só existe dentro de Atendimento se Atendimento for removido, Prontuário também vai ser
-        this.prontuario = new Prontuario(observacoes, diagnostico, "27/06/2026");
+        this(indiceConsulta, observacoes);
+        this.diagnostico = diagnostico != null ? diagnostico : "";
     }
 
-    // Construtor legado dos meninos adaptado para salvar na List do Prontuário 
-    public Atendimento(int indiceConsulta, String observacoes, String diagnostico, String[] procedimentosAntigos, int total) {
-        this.indiceConsulta = indiceConsulta;
-        //  Prontuário só existe dentro de Atendimento se Atendimento for removido, Prontuário também vai ser
-        this.prontuario = new Prontuario(observacoes, diagnostico, "27/06/2026");
-        
-        for (int i = 0; i < total; i++) {
-            this.prontuario.procedimentos.add(procedimentosAntigos[i]);
+    public Atendimento(int indiceConsulta, String observacoes, String diagnostico,
+                       String[] procedimentos, int totalProcedimentos) {
+        this(indiceConsulta, observacoes, diagnostico);
+        this.totalProcedimentos = totalProcedimentos;
+        for (int i = 0; i < totalProcedimentos; i++) {
+            this.procedimentos[i] = procedimentos[i];
         }
     }
+
+    public int getIndiceConsulta() { return indiceConsulta; }
+    public String getObservacoes() { return observacoes; }
+    public String getDiagnostico() { return diagnostico; }
+    public String[] getProcedimentos() { return procedimentos; }
+    public int getTotalProcedimentos() { return totalProcedimentos; }
+
+    public void setObservacoes(String observacoes) { this.observacoes = observacoes != null ? observacoes : ""; }
+    public void setDiagnostico(String diagnostico) { this.diagnostico = diagnostico != null ? diagnostico : ""; }
 
     public void adicionarProcedimento(String procedimento) {
-        if (this.prontuario != null) {
-            this.prontuario.procedimentos.add(procedimento);
+        if (totalProcedimentos < 10) {
+            procedimentos[totalProcedimentos] = procedimento;
+            totalProcedimentos++;
         }
     }
 
-    // SOBRECARGA: Mantendo o método antigo de adicionar vários procedimentos por segurança 
     public void adicionarProcedimento(String[] procs, int quantidade) {
-        if (this.prontuario != null) {
-            for (int i = 0; i < quantidade; i++) {
-                this.prontuario.procedimentos.add(procs[i]);
+        for (int i = 0; i < quantidade; i++) {
+            if (totalProcedimentos < 10) {
+                procedimentos[totalProcedimentos] = procs[i];
+                totalProcedimentos++;
             }
         }
     }
 
     public String exibirResumo() {
-        if (prontuario == null) return "Sem prontuário.";
-        String resumo = "Observacoes: " + prontuario.observacoes;
-        if (!prontuario.diagnostico.equals("")) {
-            resumo += "\nDiagnostico: " + prontuario.diagnostico;
-        }
-        if (!prontuario.procedimentos.isEmpty()) {
-            resumo += "\nProcedimentos: " + String.join(", ", prontuario.procedimentos);
+        String resumo = "Observacoes: " + observacoes;
+        if (!diagnostico.isEmpty()) resumo += "\nDiagnostico: " + diagnostico;
+        if (totalProcedimentos > 0) {
+            resumo += "\nProcedimentos: ";
+            for (int i = 0; i < totalProcedimentos; i++) {
+                resumo += procedimentos[i];
+                if (i < totalProcedimentos - 1) resumo += ", ";
+            }
         }
         return resumo;
     }
 
     @Override
     public String exportarDados() {
-        // Implementação obrigatória da interface Exportavel
-        return "Atendimento | Consulta ID: " + indiceConsulta + " | Obs: " + (prontuario != null ? prontuario.observacoes : "N/A");
+        return "Atendimento | Observacoes: " + observacoes;
     }
 }

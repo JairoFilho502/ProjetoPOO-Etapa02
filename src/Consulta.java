@@ -1,99 +1,70 @@
-import interfaces_horario.Agendavel;
-import interfaces_horario.Exportavel;
-
-import excecoes.PacienteInativoException;
-import excecoes.OperacaoInvalidaException;
-
 public class Consulta implements Agendavel, Exportavel {
-    
-    public Paciente paciente;
-    public Profissional profissional;
-    public String data;
-    public String horario;
-    public String tipo;
-    public String status;
+    private String cpfPaciente;
+    private String nomeProfissional;
+    private String data;
+    private String horario;
+    private String tipo;
+    private String status;
 
-    public Consulta(Paciente paciente, Profissional profissional, String data, String horario) throws PacienteInativoException {
-        validarPaciente(paciente);
-        this.paciente = paciente;
-        this.profissional = profissional;
+    public Consulta(String cpfPaciente, String nomeProfissional, String data, String horario) {
+        this.cpfPaciente = cpfPaciente;
+        this.nomeProfissional = nomeProfissional;
         this.data = data;
         this.horario = horario;
         this.tipo = "inicial";
         this.status = "agendada";
     }
 
-    public Consulta(Paciente paciente, Profissional profissional, String data, String horario, String tipo) throws PacienteInativoException {
-        validarPaciente(paciente);
-        this.paciente = paciente;
-        this.profissional = profissional;
+    public Consulta(String cpfPaciente, String nomeProfissional, String data, String horario, String tipo) {
+        this.cpfPaciente = cpfPaciente;
+        this.nomeProfissional = nomeProfissional;
         this.data = data;
         this.horario = horario;
         this.tipo = tipo;
         this.status = "agendada";
     }
 
-    public Consulta(Paciente paciente, Profissional profissional, String data, String horario, String tipo, String status) throws PacienteInativoException {
-        validarPaciente(paciente);
-        this.paciente = paciente;
-        this.profissional = profissional;
+    public Consulta(String cpfPaciente, String nomeProfissional, String data,
+                    String horario, String tipo, String status) {
+        this.cpfPaciente = cpfPaciente;
+        this.nomeProfissional = nomeProfissional;
         this.data = data;
         this.horario = horario;
         this.tipo = tipo;
         this.status = status;
     }
 
-    // Validação da tua regra de negócio
-    private void validarPaciente(Paciente pac) throws PacienteInativoException {
-        if (pac != null && !pac.isAtivo()) {
-            throw new PacienteInativoException("Não é possível agendar: o paciente está inativo.");
-        }
-    }
+    public String getCpfPaciente() { return cpfPaciente; }
+    public String getNomeProfissional() { return nomeProfissional; }
+    public String getData() { return data; }
+    public String getHorario() { return horario; }
+    public String getTipo() { return tipo; }
+    public String getStatus() { return status; }
 
-    @Override
-    public void cancelar() throws OperacaoInvalidaException {
-        if (this.status.equals("cancelada")) {
-            throw new OperacaoInvalidaException("Esta consulta já está cancelada.");
-        }
-        this.status = "cancelada";
-    }
+    public void setData(String data) { if (data != null) this.data = data; }
+    public void setHorario(String horario) { if (horario != null) this.horario = horario; }
+    public void setStatus(String status) { if (status != null) this.status = status; }
 
-    @Override
-    public void remarcar() throws OperacaoInvalidaException {
-        if (this.status.equals("cancelada")) {
-            throw new OperacaoInvalidaException("Não é possível remarcar uma consulta cancelada.");
-        }
-        this.status = "remarcada";
-    }
+    @Override public void agendar() { this.status = "agendada"; }
+    @Override public void cancelar() { this.status = "cancelada"; }
+    @Override public void remarcar() { this.status = "remarcada"; }
 
-    // Sobrecarga
-    public String cancelar(String motivo) throws OperacaoInvalidaException {
-        if (this.status.equals("cancelada")) {
-            throw new OperacaoInvalidaException("Esta consulta já está cancelada.");
-        }
+    public void realizar() { this.status = "realizada"; }
+
+    public String cancelar(String motivo) {
         this.status = "cancelada";
         return "Consulta cancelada. Motivo: " + motivo;
     }
 
     public String exibirResumo() {
-        String nomePac = (paciente != null) ? paciente.getNome() : "Desconhecido";
-        String nomeProf = (profissional != null) ? profissional.getNome() : "Desconhecido";
-        
-        return "Paciente: " + nomePac + " | Prof: " + nomeProf
+        return "Paciente(CPF): " + cpfPaciente + " | Prof: " + nomeProfissional
                 + " | Data: " + data + " | Hora: " + horario
                 + " | Tipo: " + tipo + " | Status: " + status;
     }
 
     @Override
-    public void agendar() {
-        this.status = "agendada";
-    }
-
-    @Override
     public String exportarDados() {
-        String cpfPac = (paciente != null) ? paciente.getCpf() : "N/A";
-        String nomeProf = (profissional != null) ? profissional.getNome() : "N/A";
-        
-        return "Consulta: Paciente(CPF)=" + cpfPac + " | Prof=" + nomeProf + " | Data=" + data + " | Status=" + status;
+        return "Consulta: Paciente(CPF)=" + cpfPaciente + " | Prof=" + nomeProfissional
+                + " | Data=" + data + " | Status=" + status;
     }
 }
