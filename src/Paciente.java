@@ -38,23 +38,41 @@ public class Paciente extends Pessoa {
     public Convenio getConvenio() { return convenio; }
     public String   getStatus()   { return status; }
 
-    public void setConvenio(Convenio convenio) { this.convenio = convenio; }
-    public void setStatus(String status)       { this.status   = status; }
+    // --- setters com validacao ---
+
+    // null permitido: paciente pode nao ter convenio
+    public void setConvenio(Convenio convenio) {
+        this.convenio = convenio;
+    }
+
+    // status so aceita "ativo" ou "inativo" — qualquer outro valor e rejeitado
+    public void setStatus(String status) {
+        if (status == null || (!status.equals("ativo") && !status.equals("inativo"))) {
+            throw new IllegalArgumentException("Status invalido: use 'ativo' ou 'inativo'.");
+        }
+        this.status = status;
+    }
 
     public boolean estaAtivo() {
         return "ativo".equals(status);
     }
 
-    // cadastra paciente com controle de CPF duplicado no HashSet (Jornada 2 + 28)
+    // cadastra paciente com controle de CPF e tratamento de excecao (Jornada 14 + 28)
     public static Paciente cadastrar(String nome, String cpf) {
-        if (cpfsCadastrados.contains(cpf)) {
-            System.out.println("CPF " + cpf + " ja cadastrado. Operacao bloqueada.");
+        try {
+            if (cpfsCadastrados.contains(cpf)) {
+                System.out.println("CPF " + cpf + " ja cadastrado. Operacao bloqueada.");
+                return null;
+            }
+            // new Paciente chama super() que chama setCpf/setNome — podem lancar excecao
+            Paciente p = new Paciente(nome, cpf);
+            cpfsCadastrados.add(cpf);
+            pacientesPorCpf.put(cpf, p);
+            return p;
+        } catch (IllegalArgumentException e) {
+            System.out.println("Erro ao cadastrar paciente: " + e.getMessage());
             return null;
         }
-        Paciente p = new Paciente(nome, cpf);
-        cpfsCadastrados.add(cpf);
-        pacientesPorCpf.put(cpf, p);
-        return p;
     }
 
     // busca paciente pelo CPF no HashMap — O(1) (Jornada 2 / apoio Jornada 27)
@@ -62,11 +80,13 @@ public class Paciente extends Pessoa {
         return pacientesPorCpf.get(cpf);
     }
 
+    // SOBRECARGA: mesmo nome, parametros diferentes (resolvido em tempo de compilacao)
     public void complementar(String dataNascimento, String telefone) {
         setDataNascimento(dataNascimento);
         setTelefone(telefone);
     }
 
+    // complementar com convenio incluido
     public void complementar(String dataNascimento, String telefone, Convenio convenio) {
         setDataNascimento(dataNascimento);
         setTelefone(telefone);
@@ -77,12 +97,12 @@ public class Paciente extends Pessoa {
         this.status = "inativo";
     }
 
-    // reativa o paciente quando necessario
     public void ativar() {
         this.status = "ativo";
     }
 
     // SOBRESCRITA: mesmo nome e parametros, classe filha redefine comportamento (resolvido em tempo de execucao)
+    // LIGAÇÃO DINÂMICA: quando chamado via referencia Pessoa, este metodo e executado — nao o abstrato de Pessoa
     @Override
     public void exibirResumo() {
         System.out.println(formatarDadosBase());
