@@ -1,4 +1,4 @@
-import java.util.ArrayList; // usando bibliotecas collections para chamar a coleção Lists
+import java.util.ArrayList; // usando bibliotecas collections pra chamar a coleção Lists
 import java.util.List;
 
 
@@ -80,7 +80,7 @@ public abstract class Profissional extends Pessoa{ // chamando a hierarquia com 
 
 
     public List<HorarioDisponivel>buscarHorariosAlternativos(HorarioDisponivel horarioConflitante) {
-    List<HorarioDisponivel> alt = new ArrayList<>();
+    List<HorarioDisponivel> alt = new ArrayList<>(); // arraylist pq o acesso por índice é mais rapido
         for (HorarioDisponivel h : horarios) {    
             if (!h.equals(horarioConflitante)) alt.add(h);
         }
@@ -110,6 +110,14 @@ public abstract class Profissional extends Pessoa{ // chamando a hierarquia com 
     }
 }
 
+
+// agora adc as subclasses de profissional:
+
+
+
+
+
+
 class Fisioterapeuta extends Profissional {
     private int totalSessoesPrevistas;
 
@@ -137,6 +145,11 @@ class Fisioterapeuta extends Profissional {
         atendimento.setObservacoes(obs == null || obs.isEmpty() ? "[Fisioterapia]" : obs + " [Fisioterapia]");
     }
 }
+
+
+
+
+
 
 class Psicologo extends Profissional {
     private String abordagem;
@@ -173,6 +186,11 @@ class Psicologo extends Profissional {
     }
 }
 
+
+
+
+
+
     class Nutricionista extends Profissional {
     private String focoPlanoNutricional;
 
@@ -207,6 +225,11 @@ class Psicologo extends Profissional {
         atendimento.setObservacoes(obs == null || obs.isEmpty() ? info : obs + " " + info);
     }
 }
+
+
+
+
+
 
 class ClinicoGeral extends Profissional {
     public ClinicoGeral(String nome, String registroProfissional, double valorConsulta){
