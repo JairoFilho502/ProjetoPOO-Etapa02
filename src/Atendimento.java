@@ -2,25 +2,25 @@
 public class Atendimento implements Exportavel {
     public int indiceConsulta;
     
-    // R8: COMPOSIÇÃO - Atendimento gerencia o ciclo de vida de Prontuario
+    //  Atendimento gerencia o ciclo de vida de Prontuario
     public Prontuario prontuario;
 
     public Atendimento(int indiceConsulta, String observacoes) {
         this.indiceConsulta = indiceConsulta;
-        // COMPOSIÇÃO: Prontuário é instanciado exclusivamente aqui dentro
+        // Prontuário é instanciado exclusivamente aqui dentro
         this.prontuario = new Prontuario(observacoes, "", "27/06/2026");
     }
 
     public Atendimento(int indiceConsulta, String observacoes, String diagnostico) {
         this.indiceConsulta = indiceConsulta;
-        // COMPOSIÇÃO: Prontuário só existe dentro de Atendimento se Atendimento for removido, Prontuário também é.
+        // Prontuário só existe dentro de Atendimento se Atendimento for removido, Prontuário também vai ser
         this.prontuario = new Prontuario(observacoes, diagnostico, "27/06/2026");
     }
 
-    // Construtor legado dos teus colegas adaptado para salvar na List do Prontuário (R10)
+    // Construtor legado dos meninos adaptado para salvar na List do Prontuário 
     public Atendimento(int indiceConsulta, String observacoes, String diagnostico, String[] procedimentosAntigos, int total) {
         this.indiceConsulta = indiceConsulta;
-        // COMPOSIÇÃO: Prontuário só existe dentro de Atendimento se Atendimento for removido, Prontuário também é.
+        //  Prontuário só existe dentro de Atendimento se Atendimento for removido, Prontuário também vai ser
         this.prontuario = new Prontuario(observacoes, diagnostico, "27/06/2026");
         
         for (int i = 0; i < total; i++) {
@@ -34,7 +34,7 @@ public class Atendimento implements Exportavel {
         }
     }
 
-    // SOBRECARGA: Mantendo o método antigo de adicionar vários procedimentos por segurança (R4)
+    // SOBRECARGA: Mantendo o método antigo de adicionar vários procedimentos por segurança 
     public void adicionarProcedimento(String[] procs, int quantidade) {
         if (this.prontuario != null) {
             for (int i = 0; i < quantidade; i++) {
@@ -57,7 +57,7 @@ public class Atendimento implements Exportavel {
 
     @Override
     public String exportarDados() {
-        // Requisito R7: Implementação obrigatória da interface Exportavel
+        // Implementação obrigatória da interface Exportavel
         return "Atendimento | Consulta ID: " + indiceConsulta + " | Obs: " + (prontuario != null ? prontuario.observacoes : "N/A");
     }
 }

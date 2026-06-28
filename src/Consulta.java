@@ -1,6 +1,11 @@
+import interfaces_horario.Agendavel;
+import interfaces_horario.Exportavel;
+
+import excecoes.PacienteInativoException;
+import excecoes.OperacaoInvalidaException;
+
 public class Consulta implements Agendavel, Exportavel {
     
-    // ASSOCIAÇÃO: Consulta conhece Paciente e Profissional por referência direta ao objeto 
     public Paciente paciente;
     public Profissional profissional;
     public String data;
@@ -8,8 +13,8 @@ public class Consulta implements Agendavel, Exportavel {
     public String tipo;
     public String status;
 
-    // Construtor 1: Sem tipo definido (assume inicial) 
-    public Consulta(Paciente paciente, Profissional profissional, String data, String horario) {
+    public Consulta(Paciente paciente, Profissional profissional, String data, String horario) throws PacienteInativoException {
+        validarPaciente(paciente);
         this.paciente = paciente;
         this.profissional = profissional;
         this.data = data;
@@ -18,8 +23,8 @@ public class Consulta implements Agendavel, Exportavel {
         this.status = "agendada";
     }
 
-    // Construtor 2: Completo com Tipo 
-    public Consulta(Paciente paciente, Profissional profissional, String data, String horario, String tipo) {
+    public Consulta(Paciente paciente, Profissional profissional, String data, String horario, String tipo) throws PacienteInativoException {
+        validarPaciente(paciente);
         this.paciente = paciente;
         this.profissional = profissional;
         this.data = data;
@@ -28,9 +33,8 @@ public class Consulta implements Agendavel, Exportavel {
         this.status = "agendada";
     }
 
-    // Construtor 3: Para uso na remarcação (permite setar o status direto) 
-    public Consulta(Paciente paciente, Profissional profissional, String data,
-                    String horario, String tipo, String status) {
+    public Consulta(Paciente paciente, Profissional profissional, String data, String horario, String tipo, String status) throws PacienteInativoException {
+        validarPaciente(paciente);
         this.paciente = paciente;
         this.profissional = profissional;
         this.data = data;
@@ -39,27 +43,41 @@ public class Consulta implements Agendavel, Exportavel {
         this.status = status;
     }
 
-    @Override 
-    public void cancelar() {
+    // Validação da tua regra de negócio
+    private void validarPaciente(Paciente pac) throws PacienteInativoException {
+        if (pac != null && !pac.isAtivo()) {
+            throw new PacienteInativoException("Não é possível agendar: o paciente está inativo.");
+        }
+    }
+
+    @Override
+    public void cancelar() throws OperacaoInvalidaException {
+        if (this.status.equals("cancelada")) {
+            throw new OperacaoInvalidaException("Esta consulta já está cancelada.");
+        }
         this.status = "cancelada";
     }
 
-    @Override 
-    public void remarcar() {
+    @Override
+    public void remarcar() throws OperacaoInvalidaException {
+        if (this.status.equals("cancelada")) {
+            throw new OperacaoInvalidaException("Não é possível remarcar uma consulta cancelada.");
+        }
         this.status = "remarcada";
     }
 
-    // SOBRECARGA: mesmo nome, parâmetros diferentes (resolvido em tempo de compilação) 
-    public String cancelar(String motivo) {
+    // Sobrecarga
+    public String cancelar(String motivo) throws OperacaoInvalidaException {
+        if (this.status.equals("cancelada")) {
+            throw new OperacaoInvalidaException("Esta consulta já está cancelada.");
+        }
         this.status = "cancelada";
         return "Consulta cancelada. Motivo: " + motivo;
     }
 
     public String exibirResumo() {
-        // Para o Paciente, usamos o getter porque o seu colega já o criou
         String nomePac = (paciente != null) ? paciente.getNome() : "Desconhecido";
-        // Para o Profissional, usamos o atributo direto .nome porque o getter não existe em Pessoa
-        String nomeProf = (profissional != null) ? profissional.nome : "Desconhecido";
+        String nomeProf = (profissional != null) ? profissional.getNome() : "Desconhecido";
         
         return "Paciente: " + nomePac + " | Prof: " + nomeProf
                 + " | Data: " + data + " | Hora: " + horario
@@ -73,9 +91,8 @@ public class Consulta implements Agendavel, Exportavel {
 
     @Override
     public String exportarDados() {
-        // Requisito R7: contrato obrigatório da interface Exportavel
         String cpfPac = (paciente != null) ? paciente.getCpf() : "N/A";
-        String nomeProf = (profissional != null) ? profissional.nome : "N/A";
+        String nomeProf = (profissional != null) ? profissional.getNome() : "N/A";
         
         return "Consulta: Paciente(CPF)=" + cpfPac + " | Prof=" + nomeProf + " | Data=" + data + " | Status=" + status;
     }
