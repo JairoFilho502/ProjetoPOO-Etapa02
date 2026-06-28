@@ -1,7 +1,4 @@
-package financeiro;
-import src.interfaces_horario.Exportavel;
-
-//Nao instanciem pagamentos diretamente 
+// REMOVIDAS: declaracao de pacote e import incorreto — tudo no pacote padrao
 public abstract class Pagamento implements Exportavel {
     
     // Atributos privados para armazenar o indice da cunsulta e o valor base

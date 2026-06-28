@@ -89,8 +89,9 @@ public abstract class Profissional extends Pessoa{ // chamando a hierarquia com 
 
     public static boolean especialidadeValida(String esp) {
         if (esp == null) return false;
-        return esp.equals("clinico Geral") || esp.equals("fisioterapia")
-                || esp.equals("psicologia") || esp.equals("nutricao");
+        String e = esp.trim().toLowerCase();
+        return e.equals("clinico geral") || e.equals("fisioterapia")
+                || e.equals("psicologia") || e.equals("nutricao");
     }
 
     @Override

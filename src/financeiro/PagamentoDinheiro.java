@@ -1,5 +1,4 @@
-package financeiro;
-// REQUISITO R4: Comentário obrigatório para a banca
+// REQUISITO R4: Comentario obrigatorio para a banca
 // SOBRESCRITA: aqui vai calcular o valor final com desconto de 5% pros pagamentos em dinheiro ou pix.
 
 public class PagamentoDinheiro extends Pagamento {
