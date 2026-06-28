@@ -3,6 +3,7 @@ package financeiro;
 import interfaces.Exportavel;
 import excecoes.PagamentoInvalidoException;
 
+// classe base pra todos os tipos de pagamento da clínica
 public abstract class Pagamento implements Exportavel {
     protected int    indiceConsulta;
     protected double valorBase;
@@ -17,11 +18,13 @@ public abstract class Pagamento implements Exportavel {
 
     public void setIndiceConsulta(int i) { this.indiceConsulta = i; }
 
+    // nao deixa salvar valor negativo
     public void setValorBase(double v) {
         if (v >= 0) this.valorBase = v;
         else System.out.println("Erro: Valor nao pode ser negativo.");
     }
 
+    // cada forma de pagamento calcula o valor final 
     public abstract double calcularValorFinal();
 
     public String exibirResumo() {
@@ -48,8 +51,9 @@ public abstract class Pagamento implements Exportavel {
     }
 }
 
-// -------------------------------------------------------
+// -----------------------------------------
 
+// pagamento em dinheiro ou PIX tem 5% de desconto sempre
 class PagamentoDinheiro extends Pagamento {
 
     public PagamentoDinheiro(int indiceConsulta, double valorBase) {
@@ -69,11 +73,13 @@ class PagamentoDinheiro extends Pagamento {
 
 // -------------------------------------------------------
 
+// cartao sem juros ate 3x, acima disso cobra 2.5%
 class PagamentoCartao extends Pagamento {
     private int parcelas;
 
     public PagamentoCartao(int indiceConsulta, double valorBase, int parcelas) {
         super(indiceConsulta, valorBase);
+        // máximo de 6 parcelas, menos de 1 não faz sentido
         if (parcelas < 1 || parcelas > 6)
             throw new PagamentoInvalidoException(
                     "Parcelas invalidas: deve ser entre 1 e 6. Informado: " + parcelas);
@@ -90,6 +96,7 @@ class PagamentoCartao extends Pagamento {
 
     @Override
     public double calcularValorFinal() {
+        // ate 3x e sem juros, depois cobra 2.5% por cada parcela adicional
         if (parcelas <= 3) return getValorBase();
         double taxaJuros = (parcelas - 3) * 0.025;
         return getValorBase() * (1 + taxaJuros);
@@ -101,8 +108,9 @@ class PagamentoCartao extends Pagamento {
     }
 }
 
-// -------------------------------------------------------
+// --------------------------------------
 
+// pagamento pelo convenio desconta a taxa de cobertura do valor total
 class PagamentoConvenio extends Pagamento {
     private String especialidadeConsulta;
     private double taxaCobertura;
@@ -117,6 +125,7 @@ class PagamentoConvenio extends Pagamento {
     public String getEspecialidadeConsulta() { return especialidadeConsulta; }
     public double getTaxaCobertura()         { return taxaCobertura; }
 
+    // o convenio paga a parte dele, o paciente paga o restante
     @Override
     public double calcularValorFinal() {
         return getValorBase() * (1 - taxaCobertura);
