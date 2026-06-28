@@ -1,79 +1,69 @@
 public class Paciente extends Pessoa {
-    private String cpf;
-    private int idade;
-    private String telefone;
-    private String convenioNome;
-    private String status;
 
+    // ASSOCIAÇÃO: Paciente conhece Convenio, mas ambos existem independentemente.
+    private Convenio convenio;
+    private String   status;
+
+    // SOBRECARGA: mesmo nome, parametros diferentes (resolvido em tempo de compilacao)
     public Paciente(String nome, String cpf) {
-        super(nome);
-        setCpf(cpf);
-        this.telefone = "";
-        this.convenioNome = "";
-        this.status = "ativo";
+        super(nome, cpf);
+        this.convenio = null;
+        this.status   = "ativo";
     }
 
-    public Paciente(String nome, String cpf, int idade, String telefone) {
-        this(nome, cpf);
-        setIdade(idade);
-        this.telefone = (telefone != null) ? telefone : "";
+    // construtor com nascimento e telefone
+    public Paciente(String nome, String cpf, String dataNascimento, String telefone) {
+        super(nome, cpf, dataNascimento, telefone);
+        this.convenio = null;
+        this.status   = "ativo";
     }
 
-    public Paciente(String nome, String cpf, int idade, String telefone, String convenioNome) {
-        this(nome, cpf, idade, telefone);
-        setConvenioNome(convenioNome);
+    // construtor completo com convenio
+    public Paciente(String nome, String cpf, String dataNascimento, String telefone, Convenio convenio) {
+        super(nome, cpf, dataNascimento, telefone);
+        this.convenio = convenio;
+        this.status   = "ativo";
     }
 
-    public String getCpf() { return cpf; }
-    public int getIdade() { return idade; }
-    public String getTelefone() { return telefone; }
-    public String getConvenioNome() { return convenioNome; }
-    public String getStatus() { return status; }
+    // --- getters proprios (nome, cpf, tel, dataNascimento vem de Pessoa via heranca) ---
+    public Convenio getConvenio() { return convenio; }
+    public String   getStatus()   { return status; }
 
-    public void setCpf(String cpf) {
-        if (cpf == null || cpf.trim().isEmpty())
-            throw new IllegalArgumentException("CPF nao pode ser vazio.");
-        this.cpf = cpf.trim();
+    // --- setters proprios ---
+    public void setConvenio(Convenio convenio) { this.convenio = convenio; }
+    public void setStatus(String status)       { this.status   = status; }
+
+    public boolean estaAtivo() {
+        return "ativo".equals(status);
     }
 
-    public void setIdade(int idade) {
-        if (idade < 0 || idade > 150)
-            throw new IllegalArgumentException("Idade invalida.");
-        this.idade = idade;
-    }
-
-    public void setTelefone(String telefone) {
-        this.telefone = (telefone != null) ? telefone : "";
-    }
-
-    public void setConvenioNome(String convenioNome) {
-        this.convenioNome = (convenioNome != null) ? convenioNome : "";
-    }
-
-    public boolean estaAtivo() { return "ativo".equals(status); }
-    public boolean isAtivo() { return estaAtivo(); }
-
-    public void desativar() { this.status = "inativo"; }
-    public void ativar() { this.status = "ativo"; }
-
-    public void complementar(int idade, String telefone) {
-        setIdade(idade);
+    // atualiza nascimento e telefone usando setters herdados de Pessoa
+    public void complementar(String dataNascimento, String telefone) {
+        setDataNascimento(dataNascimento);
         setTelefone(telefone);
     }
 
-    public void complementar(String telefone, String convenioNome) {
+    // atualiza dados com convenio incluido
+    public void complementar(String dataNascimento, String telefone, Convenio convenio) {
+        setDataNascimento(dataNascimento);
         setTelefone(telefone);
-        setConvenioNome(convenioNome);
+        this.convenio = convenio;
     }
 
-    public void complementar(int idade, String telefone, String convenioNome) {
-        setIdade(idade);
-        setTelefone(telefone);
-        setConvenioNome(convenioNome);
+    public void desativar() {
+        this.status = "inativo";
     }
 
+    // SOBRESCRITA: mesmo nome e parametros, classe filha redefine comportamento (resolvido em tempo de execucao)
     @Override
-    public String exibirResumo() {
-        return "Paciente: " + getNome() + " | CPF: " + cpf + " | Status: " + status;
+    public void exibirResumo() {
+        System.out.println(formatarDadosBase());
+        System.out.println("Status: " + status);
+        if (convenio != null) {
+            System.out.println("Convenio: " + convenio.getNome()
+                    + " | Cobertura: " + (int)(convenio.getPercentualCobertura() * 100) + "%");
+        } else {
+            System.out.println("Convenio: sem convenio");
+        }
     }
 }
