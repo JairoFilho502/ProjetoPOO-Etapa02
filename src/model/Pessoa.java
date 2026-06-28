@@ -1,11 +1,18 @@
 package model;
 
+// superclasse base, subclasses dela são: paciente e profissional
+
+
 public abstract class Pessoa {
     private String nome;
     private String cpf;
     private int    idade;
     private String telefone;
 
+
+
+
+    // construtor mínimo, só com nome!
     public Pessoa(String nome) {
         setNome(nome);
         this.cpf      = "";
@@ -13,6 +20,7 @@ public abstract class Pessoa {
         this.telefone = "";
     }
 
+ 
     public Pessoa(String nome, String cpf) {
         setNome(nome);
         setCpf(cpf);
@@ -20,6 +28,12 @@ public abstract class Pessoa {
         this.telefone = "";
     }
 
+
+
+
+
+
+    // construtor completo
     public Pessoa(String nome, String cpf, int idade, String telefone) {
         setNome(nome);
         setCpf(cpf);
@@ -38,26 +52,34 @@ public abstract class Pessoa {
         this.nome = nome.trim();
     }
 
+    // CPFnão pode ser vazio
     public void setCpf(String cpf) {
         if (cpf == null || cpf.trim().isEmpty())
             throw new IllegalArgumentException("CPF nao pode ser vazio.");
         this.cpf = cpf.trim();
     }
 
+
+
+
+    // ninguém tem idade negativa ne
     public void setIdade(int idade) {
         if (idade < 0)
             throw new IllegalArgumentException("Idade nao pode ser negativa.");
         this.idade = idade;
     }
 
+    // telefone pode ser vazio, então trata null aqui
     public void setTelefone(String telefone) {
         this.telefone = telefone != null ? telefone.trim() : "";
     }
 
+    // monta uma string com os dados básicos praexibir
     protected String formatarDadosBase() {
         return "Nome: " + nome + " | CPF: " + cpf
                 + " | Idade: " + idade + " | Tel: " + telefone;
     }
 
+    
     public abstract String exibirResumo();
 }
