@@ -3,10 +3,18 @@ package model;
 import java.util.ArrayList;
 import java.util.List;
 
+
+
+
+
+// subclasse de pessoa
 public abstract class Profissional extends Pessoa {
     private String                 especialidade;
     private String                 registroProfissional;
     private double                 valorConsulta;
+    
+
+// AGREGAÇÃO: horarios existem independentemente do profissional 
     private List<HorarioDisponivel> horarios;
 
     public Profissional(String nome, String especialidade,
@@ -18,17 +26,25 @@ public abstract class Profissional extends Pessoa {
         this.horarios             = new ArrayList<>();
     }
 
-    public String                  getEspecialidade()        { return especialidade; }
-    public String                  getRegistroProfissional() { return registroProfissional; }
-    public double                  getValorConsulta()        { return valorConsulta; }
-    public List<HorarioDisponivel> getHorarios()             { return horarios; }
+    public String                  getEspecialidade()        { 
+return especialidade; }
+    public String                  getRegistroProfissional() { 
+return registroProfissional; }
+    public double                  getValorConsulta()        { 
+return valorConsulta; }
+    public List<HorarioDisponivel> getHorarios()             { 
+return horarios; }
 
+    
+// SOBRECARGA: atualiza só registro e valor, sem mexer nos horarios
     public void atualizar(String registro, double valor) {
         if (validarRegistro(registro)) {
             this.registroProfissional = registro;
             this.valorConsulta        = valor;
         }
     }
+
+    // SOBRECARGA: atualiza tudo incluindo a lista de horários disponíveis
 
     public void atualizar(String registro, double valor, List<HorarioDisponivel> novosHorarios) {
         if (validarRegistro(registro)) {
@@ -39,6 +55,8 @@ public abstract class Profissional extends Pessoa {
         }
     }
 
+    // não adiciona duplicata na lista de horários
+
     public void adicionarHorario(HorarioDisponivel horario) {
         if (horario != null && !horarios.contains(horario)) horarios.add(horario);
     }
@@ -47,12 +65,14 @@ public abstract class Profissional extends Pessoa {
         return horarios.remove(horario);
     }
 
+    // verifica se o profissional tem algum horário cadastrado naquele dia
     public boolean atendeNoDia(String dia) {
         for (HorarioDisponivel h : horarios)
             if (h.getDiaSemana() != null && h.getDiaSemana().equalsIgnoreCase(dia)) return true;
         return false;
     }
 
+    // retorna todos os horários menos o que está em conflito
     public List<HorarioDisponivel> buscarHorariosAlternativos(HorarioDisponivel conflitante) {
         List<HorarioDisponivel> alt = new ArrayList<>();
         for (HorarioDisponivel h : horarios)
@@ -65,6 +85,7 @@ public abstract class Profissional extends Pessoa {
         for (HorarioDisponivel h : horarios) System.out.println("- " + h);
     }
 
+    // as quatro especialidades aceitas pelo sistema
     public static boolean especialidadeValida(String esp) {
         if (esp == null) return false;
         String e = esp.trim().toLowerCase();
@@ -72,7 +93,6 @@ public abstract class Profissional extends Pessoa {
                 || e.equals("psicologia") || e.equals("nutricao");
     }
 
-    // Metodo fabrica — permite que Main crie subclasses sem acessar diretamente
     public static Profissional criar(String nome, String especialidade,
                                      String registro, double valor) {
         switch (especialidade.trim().toLowerCase()) {
@@ -91,6 +111,7 @@ public abstract class Profissional extends Pessoa {
         return true;
     }
 
+    // sobrescrita: cada especialidade implementa do seu jeito
     public abstract void registrarEspecifico(Atendimento atendimento);
 
     @Override
@@ -103,7 +124,14 @@ public abstract class Profissional extends Pessoa {
     }
 }
 
-// -------------------------------------------------------
+// ------------------------------------------ abaixo as subclasses -------------
+
+// fisioterapeuta 
+
+
+
+
+
 
 class Fisioterapeuta extends Profissional {
     private int totalSessoesPrevistas;
@@ -116,7 +144,10 @@ class Fisioterapeuta extends Profissional {
     public int getTotalSessoesPrevistas() { return totalSessoesPrevistas; }
     public void setTotalSessoesPrevistas(int s) { if (s >= 0) this.totalSessoesPrevistas = s; }
 
-    @Override
+    // sobrescr: adiciona tag fisioterapia nas observações do atendimento
+   
+
+ @Override
     public void registrarEspecifico(Atendimento atendimento) {
         if (atendimento == null) return;
         String obs = atendimento.getObservacoes();
@@ -129,7 +160,15 @@ class Fisioterapeuta extends Profissional {
     }
 }
 
-// -------------------------------------------------------
+// --------------------------------------
+
+
+
+
+
+
+
+// psicólogo 
 
 class Psicologo extends Profissional {
     private String abordagem;
@@ -139,9 +178,10 @@ class Psicologo extends Profissional {
         this.abordagem = abordagem != null ? abordagem : "";
     }
 
-    public String getAbordagem()           { return abordagem; }
-    public void   setAbordagem(String a)   { this.abordagem = a != null ? a : ""; }
+    public String getAbordagem()         { return abordagem; }
+    public void   setAbordagem(String a) { this.abordagem = a != null ? a : ""; }
 
+    // SOBRESCRITA: marca nas observações qual foi a abordagem usada na sessão
     @Override
     public void registrarEspecifico(Atendimento atendimento) {
         if (atendimento == null) return;
@@ -158,48 +198,74 @@ class Psicologo extends Profissional {
 
 // -------------------------------------------------------
 
-class Nutricionista extends Profissional {
-    private String focoPlanoNutricional;
 
-    public Nutricionista(String nome, String registro, double valor, String foco) {
+
+
+
+
+// nutricionista 
+
+
+
+
+
+class Nutricionista extends Profissional {
+    private String planoAlimentar; 
+    public Nutricionista(String nome, String registro, double valor, String plano) {
         super(nome, "nutricao", registro, valor);
-        this.focoPlanoNutricional = foco != null ? foco : "";
+        this.planoAlimentar = plano != null ? plano : "";
     }
 
-    public String getFocoPlanoNutricional()       { return focoPlanoNutricional; }
-    public void   setFocoPlanoNutricional(String f) { this.focoPlanoNutricional = f != null ? f : ""; }
+    public String getPlanoAlimentar()        { return planoAlimentar; }
+    public void   setPlanoAlimentar(String p) { this.planoAlimentar = p != null ? p : ""; }
 
     @Override
     public void registrarEspecifico(Atendimento atendimento) {
         if (atendimento == null) return;
-        String info = "[Nutricao - Foco: " + focoPlanoNutricional + "]";
+        String info = "[Nutricao - Plano: " + planoAlimentar + "]";
         String obs  = atendimento.getObservacoes();
         atendimento.setObservacoes(obs.isEmpty() ? info : obs + " " + info);
     }
 
     @Override
     public String exibirResumo() {
-        return super.exibirResumo() + " | Foco Nutricional: " + focoPlanoNutricional;
+        return super.exibirResumo() + " | Plano Alimentar: " + planoAlimentar;
     }
 }
 
-// -------------------------------------------------------
+// ----------------------------------
+
+
+
+
+
+
+
+// clínico geral 
 
 class ClinicoGeral extends Profissional {
+    private String encaminhamento; // encaminhamento para especialista quando necessário
 
     public ClinicoGeral(String nome, String registro, double valor) {
         super(nome, "clinica geral", registro, valor);
+        this.encaminhamento = "";
     }
 
+    public String getEncaminhamento()          { return encaminhamento; }
+    public void   setEncaminhamento(String enc) { this.encaminhamento = enc != null ? enc : ""; }
+
+    // SOBRESCRITA: adiciona tag [Clinica Geral] e encaminhamento (se houver) nas observações
     @Override
     public void registrarEspecifico(Atendimento atendimento) {
         if (atendimento == null) return;
-        String obs = atendimento.getObservacoes();
-        atendimento.setObservacoes(obs.isEmpty() ? "[Clinica Geral]" : obs + " [Clinica Geral]");
+        String info = "[Clinica Geral" + (encaminhamento.isEmpty() ? "" : " - Enc: " + encaminhamento) + "]";
+        String obs  = atendimento.getObservacoes();
+        atendimento.setObservacoes(obs.isEmpty() ? info : obs + " " + info);
     }
 
     @Override
     public String exibirResumo() {
-        return super.exibirResumo() + " | Tipo: Clinico Geral";
+        String base = super.exibirResumo() + " | Tipo: Clinico Geral";
+        return encaminhamento.isEmpty() ? base : base + " | Encaminhamento: " + encaminhamento;
     }
 }
