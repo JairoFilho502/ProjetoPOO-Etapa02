@@ -1,214 +1,172 @@
-// importando bibliotecas de collections
 import java.util.ArrayList;
 import java.util.List;
 
+public abstract class Profissional extends Pessoa {
+    private String especialidade;
+    private String registroProfissional;
+    private double valorConsulta;
+    private List<HorarioDisponivel> horarios;
 
-// Classe PROFISSIONAL tornada abstract
-public abstract class Profissional extends Pessoa{
-    public String especialidade;
-    public String registroProfissional;
-    public double valorConsulta;
-
-    // alterando dias disponíveis para objetos HorarioDisponivel
-    public List<HorarioDisponivel> horarios;
-
-    // só nome e especialidade
-    // adaptado para chamar nome e inicializar lista
-    public Profissional(String nome, String especialidade, String registroProfissional, double valorConsulta){
-        super(nome); // Corrigido: A classe Pessoa só pede o nome!
-        
+    public Profissional(String nome, String especialidade, String registroProfissional, double valorConsulta) {
+        super(nome);
         this.especialidade = especialidade;
         this.registroProfissional = registroProfissional;
         this.valorConsulta = valorConsulta;
-        this.horarios = new ArrayList<>(); // inicializando a lista de horários
+        this.horarios = new ArrayList<>();
     }
 
+    public String getEspecialidade() { return especialidade; }
+    public String getRegistroProfissional() { return registroProfissional; }
+    public double getValorConsulta() { return valorConsulta; }
+    public List<HorarioDisponivel> getHorarios() { return horarios; }
+
     public void atualizar(String registro, double valor) {
-        if(validarRegistro(registro)){
+        if (validarRegistro(registro)) {
             this.registroProfissional = registro;
             this.valorConsulta = valor;
         }
     }
-        
-    
-    public void atualizar(String registro, double valor, List<HorarioDisponivel> novosHorarios){
-    if(validarRegistro(registro)){
-        this.registroProfissional = registro;
-        this.valorConsulta = valor;
-        this.horarios = novosHorarios;
-    }
-   }
 
-    // verifica se o profissional atende naquele dia
-    public boolean atendeNoDia(String dia){
-        for (HorarioDisponivel horario : horarios) {
-            if (horario.getDiaSemana().equalsIgnoreCase(dia)){
-                return true;
-            }
+    public void atualizar(String registro, double valor, List<HorarioDisponivel> novosHorarios) {
+        if (validarRegistro(registro)) {
+            this.registroProfissional = registro;
+            this.valorConsulta = valor;
+            this.horarios = novosHorarios;
+        }
+    }
+
+    public boolean atendeNoDia(String dia) {
+        for (HorarioDisponivel h : horarios) {
+            if (h.getDiaSemana().equalsIgnoreCase(dia)) return true;
         }
         return false;
-    } 
+    }
 
     public void adicionarHorario(HorarioDisponivel horario) {
-        if (horario != null && !horarios.contains(horario)){
-            horarios.add(horario);
-        }
+        if (horario != null && !horarios.contains(horario)) horarios.add(horario);
     }
 
-    public boolean removerHorario(HorarioDisponivel horario){
-        return horarios.remove(horario);
-    }
-
-    public List<HorarioDisponivel> getHorarios() {
-        return horarios;
-    }
+    public boolean removerHorario(HorarioDisponivel horario) { return horarios.remove(horario); }
 
     public void listarHorarios() {
-        if (horarios.isEmpty()) {
-            System.out.println("Nenhum horário disponível cadastrado");
-                return;
-        }
-
-        for (HorarioDisponivel horario : horarios) {
-        
-            System.out.println("-" + horario);
-        }
+        if (horarios.isEmpty()) { System.out.println("Nenhum horario disponivel."); return; }
+        for (HorarioDisponivel h : horarios) System.out.println("- " + h);
     }
 
     public List<HorarioDisponivel> buscarHorariosAlternativos(HorarioDisponivel horarioConflitante) {
-        List<HorarioDisponivel> alternativas = new ArrayList<>();
-
-        for (HorarioDisponivel horario : horarios) {
-            if (!horario.equals(horarioConflitante)) {
-                alternativas.add(horario);
-            }
+        List<HorarioDisponivel> alt = new ArrayList<>();
+        for (HorarioDisponivel h : horarios) {
+            if (!h.equals(horarioConflitante)) alt.add(h);
         }
-
-        return alternativas;
+        return alt;
     }
 
-    // valida as especialidades aceitas pela clínica
     public static boolean especialidadeValida(String esp) {
-        if (esp.equals("clinica geral")) return true;
-        if (esp.equals("fisioterapia")) return true;
-        if (esp.equals("psicologia")) return true;
-        if (esp.equals("nutricao")) return true;
-        return false;
+        if (esp == null) return false;
+        return esp.equals("clinica geral") || esp.equals("fisioterapia")
+                || esp.equals("psicologia") || esp.equals("nutricao");
     }
 
     @Override
     public String exibirResumo() {
-        return super.exibirResumo() + " | Espec: " + especialidade + " | Reg: " + registroProfissional
-                + " | Valor: R$" + valorConsulta + " | Horários: " + horarios.toString();
+        return "Nome: " + getNome() + " | Espec: " + especialidade
+                + " | Reg: " + registroProfissional + " | Valor: R$" + valorConsulta
+                + " | Horarios: " + horarios.toString();
     }
 
-    // declaração método abstrato
     public abstract void registrarEspecifico(Atendimento atendimento);
 
-    // adicionando metodo protected
     protected boolean validarRegistro(String registro) {
         if (registro == null || registro.isEmpty()) {
-            System.out.println("Erro: Registro profissional inválido");
+            System.out.println("Erro: Registro profissional invalido.");
             return false;
         }
         return true;
     }
 }
 
-// classe fisioterapeuta
 class Fisioterapeuta extends Profissional {
-
-    public int totalSessoesPrevistas;
+    private int totalSessoesPrevistas;
 
     public Fisioterapeuta(String nome, String registroProfissional, double valorConsulta, int sessoes) {
         super(nome, "fisioterapia", registroProfissional, valorConsulta);
         this.totalSessoesPrevistas = sessoes;
     }
 
-    // override de exibirResumo
+    public int getTotalSessoesPrevistas() { return totalSessoesPrevistas; }
+    public void setTotalSessoesPrevistas(int s) { if (s >= 0) this.totalSessoesPrevistas = s; }
+
     @Override
     public String exibirResumo() {
-        return super.exibirResumo() + " | Sessões Previstas: " + totalSessoesPrevistas;
+        return super.exibirResumo() + " | Sessoes Previstas: " + totalSessoesPrevistas;
     }
 
-    // override obrigatório de registro específico
     @Override
     public void registrarEspecifico(Atendimento atendimento) {
-        if (atendimento != null && atendimento.prontuario != null) {
-            if (atendimento.prontuario.observacoes == null || atendimento.prontuario.observacoes.isEmpty()) {
-                atendimento.prontuario.observacoes = "[Fisioterapia]";
-            } else {
-                atendimento.prontuario.observacoes += " [Fisioterapia]";
-            }
-        }
+        if (atendimento == null) return;
+        String obs = atendimento.getObservacoes();
+        atendimento.setObservacoes(obs == null || obs.isEmpty() ? "[Fisioterapia]" : obs + " [Fisioterapia]");
     }
 }
 
-// classe psicologo
 class Psicologo extends Profissional {
-
-    public String abordagem;
+    private String abordagem;
 
     public Psicologo(String nome, String registroProfissional, double valorConsulta, String abordagem) {
         super(nome, "psicologia", registroProfissional, valorConsulta);
         this.abordagem = abordagem;
     }
 
-    // override de exibirResumo
-    @Override
-    public String exibirResumo() {
-        return super.exibirResumo() + " | Abordagem: " + abordagem;
-    }
+    public String getAbordagem() { return abordagem; }
+    public void setAbordagem(String abordagem) { this.abordagem = abordagem != null ? abordagem : ""; }
 
-// override de registrarEspecifico
+    @Override
+    public String exibirResumo() { return super.exibirResumo() + " | Abordagem: " + abordagem; }
+
     @Override
     public void registrarEspecifico(Atendimento atendimento) {
-        if (atendimento != null && atendimento.prontuario != null) {
-            String info = "[Psicologia - " + this.abordagem + "]";
-            if (atendimento.prontuario.observacoes == null || atendimento.prontuario.observacoes.isEmpty()) {
-                atendimento.prontuario.observacoes = info;
-            } else {
-                atendimento.prontuario.observacoes += " " + info;
-            }
-        }
+        if (atendimento == null) return;
+        String info = "[Psicologia - " + abordagem + "]";
+        String obs = atendimento.getObservacoes();
+        atendimento.setObservacoes(obs == null || obs.isEmpty() ? info : obs + " " + info);
     }
 }
 
-// classe dos nutricionistas
 class Nutricionista extends Profissional {
-    public String focoPlanoNutricional;
+    private String focoPlanoNutricional;
 
-      public Nutricionista(String nome, String registroProfissional, double valorConsulta, String focoPlanoNutricional) {  
+    public Nutricionista(String nome, String registroProfissional, double valorConsulta, String foco) {
         super(nome, "nutricao", registroProfissional, valorConsulta);
-        this.focoPlanoNutricional = focoPlanoNutricional;
+        this.focoPlanoNutricional = foco;
     }
 
-    // override de exibirResumo
+    public String getFocoPlanoNutricional() { return focoPlanoNutricional; }
+    public void setFocoPlanoNutricional(String f) { this.focoPlanoNutricional = f != null ? f : ""; }
+
     @Override
-    public String exibirResumo() {
-        return super.exibirResumo() + " | Foco Nutricional: " + focoPlanoNutricional;
-    }
+    public String exibirResumo() { return super.exibirResumo() + " | Foco Nutricional: " + focoPlanoNutricional; }
 
-// override de registrarEspecifico
     @Override
     public void registrarEspecifico(Atendimento atendimento) {
-        if (atendimento != null && atendimento.prontuario != null) {
-            String info = "[Nutrição -- Foco: " + this.focoPlanoNutricional + "]";
-            if (atendimento.prontuario.observacoes == null || atendimento.prontuario.observacoes.isEmpty()) {
-                atendimento.prontuario.observacoes = info;
-            } else {
-                atendimento.prontuario.observacoes += " " + info;
-            }
-        }
+        if (atendimento == null) return;
+        String info = "[Nutricao -- Foco: " + focoPlanoNutricional + "]";
+        String obs = atendimento.getObservacoes();
+        atendimento.setObservacoes(obs == null || obs.isEmpty() ? info : obs + " " + info);
     }
 }
 
+class ClinicoGeral extends Profissional {
+    public ClinicoGeral(String nome, String registroProfissional, double valorConsulta) {
+        super(nome, "clinica geral", registroProfissional, valorConsulta);
+    }
 
+    @Override
+    public String exibirResumo() { return super.exibirResumo() + " | Tipo: Clinico Geral"; }
 
-
-
-
-
-
-
-
+    @Override
+    public void registrarEspecifico(Atendimento atendimento) {
+        if (atendimento == null) return;
+        String obs = atendimento.getObservacoes();
+        atendimento.setObservacoes(obs == null || obs.isEmpty() ? "[Clinica Geral]" : obs + " [Clinica Geral]");
+    }
+}
