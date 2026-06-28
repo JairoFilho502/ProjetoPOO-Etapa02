@@ -1,5 +1,7 @@
+import src.interfaces_horario.Exportavel;
+
 //Nao instanciem pagamentos diretamente 
-public abstract class Pagamento {
+public abstract class Pagamento implements Exportavel {
     
     // Atributos privados para armazenar o indice da cunsulta e o valor base
     protected int indiceConsulta;
@@ -26,5 +28,10 @@ public abstract class Pagamento {
     // método concreto que exibe o resumo do pagamento e os valores base e final
     public String exibirResumo() {
         return "Consulta #" + indiceConsulta + " | Valor Base: R$" + valorBase;
+    }
+
+    @Override
+    public String exportarDados() {
+        return "Pagamento | Consulta ID:" + getIndiceConsulta() + " | Valor Final: R$" + calcularValorFinal();  
     }
 }
