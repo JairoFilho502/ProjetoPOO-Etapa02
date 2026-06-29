@@ -4,9 +4,9 @@ import interfaces.Agendavel;
 import interfaces.Exportavel;
 
 // uma consulta liga o paciente ao profissional num dia e horário específico
+// ASSOCIAÇÃO: Consulta conhece Paciente (por cpfPaciente) e Profissional (por nomeProfissional)
+// sem guardar referência direta — os objetos existem independentemente da Consulta
 public class Consulta implements Agendavel, Exportavel {
-    // Consulta referencia Paciente e Profissional por identificadores
-    // sem manter referência direta aos objetos
     private String cpfPaciente;
     private String nomeProfissional;
     private String data;

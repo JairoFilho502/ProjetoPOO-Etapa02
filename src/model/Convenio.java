@@ -9,11 +9,19 @@ public class Convenio {
     private double percentualCobertura;
     private List<String> especialidadesCobertas;
 
-    // por padrão cobre 40% (0.4)
+    // percentual depende do plano: SaúdePlus 40%, VidaMais 30%, BemEstar 50%
     public Convenio(String nome) {
         this.nome = nome != null ? nome.trim() : "";
-        this.percentualCobertura = 0.4;
         this.especialidadesCobertas = new ArrayList<>();
+        String n = this.nome;
+        if (n.equalsIgnoreCase("SaúdePlus") || n.equalsIgnoreCase("SaudePlus"))
+            this.percentualCobertura = 0.40;
+        else if (n.equalsIgnoreCase("VidaMais") || n.equalsIgnoreCase("Vida Mais"))
+            this.percentualCobertura = 0.30;
+        else if (n.equalsIgnoreCase("BemEstar") || n.equalsIgnoreCase("Bem Estar"))
+            this.percentualCobertura = 0.50;
+        else
+            this.percentualCobertura = 0.40; // padrao pra planos nao reconhecidos
     }
 
     // construtor com cobertura personalizada

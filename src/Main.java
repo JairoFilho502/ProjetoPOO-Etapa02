@@ -8,7 +8,9 @@ import financeiro.Pagamento;
 import servico.ClinicaServico;
 import servico.Relatorio;
 import excecoes.ConsultaNaoEncontradaException;
+import excecoes.ConvenioNaoCobreException;
 import excecoes.HorarioIndisponivelException;
+import excecoes.OperacaoInvalidaException;
 import excecoes.PacienteInativoException;
 import excecoes.PacienteNaoEncontradoException;
 import excecoes.PagamentoInvalidoException;
@@ -499,15 +501,6 @@ public class Main {
             System.out.println("Consulta nao encontrada.");
             return;
         }
-        if (lista.get(idx).getStatus().equals("realizada")) {
-            System.out.println("Consulta ja realizada.");
-            return;
-        }
-        if (lista.get(idx).getStatus().equals("cancelada")) {
-            System.out.println("Consulta ja cancelada.");
-            return;
-        }
-
         System.out.print("Horario atual (HH:MM) para verificar multa: ");
         String horaAtual = sc.nextLine();
         try {
@@ -533,6 +526,8 @@ public class Main {
             System.out.println("Consulta cancelada.");
         } catch (ConsultaNaoEncontradaException e) {
             System.out.println("Erro ao cancelar: " + e.getMessage());
+        } catch (OperacaoInvalidaException e) {
+            System.out.println("Operacao invalida: " + e.getMessage());
         }
     }
 
@@ -592,7 +587,7 @@ public class Main {
             System.out.println("Consulta remarcada com sucesso!");
         } catch (ProfissionalNaoEncontradoException | ConsultaNaoEncontradaException
                 | PacienteNaoEncontradoException | PacienteInativoException
-                | HorarioIndisponivelException e) {
+                | HorarioIndisponivelException | OperacaoInvalidaException e) {
             System.out.println("Erro ao remarcar: " + e.getMessage());
         }
     }
@@ -639,6 +634,7 @@ public class Main {
             String[] nomes = { "sabado", "domingo", "segunda", "terca", "quarta", "quinta", "sexta" };
             return nomes[resultado];
         } catch (Exception e) {
+            System.out.println("Data invalida: nao foi possivel determinar o dia da semana.");
             return "";
         }
     }
@@ -807,11 +803,14 @@ public class Main {
         Consulta c = lista.get(idxConsulta);
         double valorBase = 0;
         boolean temConvenio = false;
+        double coberturaConvenio = 0.4;
         try {
             Profissional prof = servico.buscarProfissional(c.getNomeProfissional());
             valorBase = prof.getValorConsulta();
             Paciente pac = servico.buscarPaciente(c.getCpfPaciente());
             temConvenio = !pac.getConvenioNome().isEmpty();
+            if (temConvenio && pac.getConvenio() != null)
+                coberturaConvenio = pac.getConvenio().getPercentualCobertura();
         } catch (ProfissionalNaoEncontradoException | PacienteNaoEncontradoException e) {
             System.out.println("Erro ao buscar dados: " + e.getMessage());
             return;
@@ -837,6 +836,9 @@ public class Main {
         System.out.print("Tipo (dinheiro/cartao/convenio): ");
         String tipoPag = sc.nextLine().trim().toLowerCase();
         try {
+            // ConvenioNaoCobreException: lançada antes de criar o pagamento
+            if (tipoPag.equals("convenio") && !temConvenio)
+                throw new ConvenioNaoCobreException("Paciente nao possui convenio cadastrado.");
             Pagamento pag;
             if (tipoPag.equals("cartao")) {
                 int parc = lerInteiro("Parcelas (1 a 6): ");
@@ -845,14 +847,15 @@ public class Main {
                 if (parc > 6)
                     parc = 6;
                 pag = Pagamento.criarCartao(idxConsulta, valorFinal, parc);
-            } else if (tipoPag.equals("convenio") && temConvenio) {
+            } else if (tipoPag.equals("convenio")) {
                 String espProf = "";
                 try {
                     espProf = servico.buscarProfissional(c.getNomeProfissional()).getEspecialidade();
                 } catch (ProfissionalNaoEncontradoException e) {
                     espProf = "geral";
                 }
-                pag = Pagamento.criarConvenio(idxConsulta, valorFinal, espProf, 0.4);
+                // usa o percentual real do convenio do paciente (SaúdePlus/VidaMais/BemEstar)
+                pag = Pagamento.criarConvenio(idxConsulta, valorFinal, espProf, coberturaConvenio);
             } else {
                 pag = Pagamento.criarDinheiro(idxConsulta, valorFinal);
             }
@@ -860,6 +863,8 @@ public class Main {
             System.out.println("Pagamento registrado com sucesso!");
         } catch (PagamentoInvalidoException e) {
             System.out.println("Erro: " + e.getMessage());
+        } catch (ConvenioNaoCobreException e) {
+            System.out.println("Convenio invalido: " + e.getMessage());
         }
     }
 
@@ -899,6 +904,7 @@ public class Main {
             System.out.println("3 - Por periodo");
             System.out.println("4 - Resumo financeiro");
             System.out.println("5 - Relatorio unificado (Pacientes + Profissionais)");
+            System.out.println("6 - Exportar dados (Exportavel)");
             System.out.println("0 - Voltar");
             op = lerInteiro("Opcao: ");
             switch (op) {
@@ -925,6 +931,9 @@ public class Main {
                 case 5:
                     relatorioUnificado();
                     break;
+                case 6:
+                    exportarDados();
+                    break;
                 case 0:
                     break;
                 default:
@@ -950,12 +959,26 @@ public class Main {
             } else if (p instanceof Profissional) {
                 System.out.print("[PROFISSIONAL]  ");
             }
-            // LIGAÇÃO DINÂMICA: o método exibirResumo() executado depende do tipo REAL do
-            // objeto
-            // em tempo de execução — Paciente.exibirResumo(), ClinicoGeral.exibirResumo(),
-            // etc.
+            // LIGAÇÃO DINÂMICA: o método chamado depende do tipo REAL do objeto, não do tipo da referência
             System.out.println(p.exibirResumo());
         }
         System.out.println("Total: " + pessoas.size() + " pessoa(s) cadastrada(s).");
+    }
+
+    // Jornada 26 — chama exportarDados() em todos os Exportavel do sistema
+    public static void exportarDados() {
+        System.out.println("\n=== EXPORTACAO DE DADOS (interface Exportavel) ===");
+        List<Consulta> consultas = servico.listarConsultas();
+        List<Atendimento> atendimentos = servico.listarAtendimentos();
+        List<Pagamento> pagamentos = servico.listarPagamentos();
+        System.out.println("--- Consultas ---");
+        if (consultas.isEmpty()) System.out.println("Nenhuma.");
+        for (Consulta c : consultas) System.out.println(c.exportarDados());
+        System.out.println("--- Atendimentos ---");
+        if (atendimentos.isEmpty()) System.out.println("Nenhum.");
+        for (Atendimento a : atendimentos) System.out.println(a.exportarDados());
+        System.out.println("--- Pagamentos ---");
+        if (pagamentos.isEmpty()) System.out.println("Nenhum.");
+        for (Pagamento p : pagamentos) System.out.println(p.exportarDados());
     }
 }

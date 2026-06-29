@@ -10,7 +10,7 @@ import java.util.List;
 
 
 
-// exemplo de composição pq atendimento contém um prontuario que não existe fora desse atendimento
+// COMPOSIÇÃO: Prontuário só existe dentro de Atendimento — se Atendimento for removido, Prontuário também é
 
 public class Atendimento implements Exportavel {
     private int      indiceConsulta;
@@ -39,21 +39,12 @@ public class Atendimento implements Exportavel {
         this.prontuario.adicionarProcedimentos(procedimentos, totalProcedimentos);
     }
 
-    public int    getIndiceConsulta() { 
-
-return indiceConsulta; }
-    
-public String getObservacoes()    { 
-
-return observacoes; }
-
-   
+    public int    getIndiceConsulta() { return indiceConsulta; }
+    public String getObservacoes()    { return observacoes; }
 
 
-
- // joga pro prontuario para manter o encapsulamento da composição
-    
-public String       getDiagnostico()   { return prontuario.getDiagnostico(); }
+    // delega pro prontuario para manter o encapsulamento
+    public String       getDiagnostico()   { return prontuario.getDiagnostico(); }
     public List<String> getProcedimentos() { return prontuario.getProcedimentos(); }
 
     public void setObservacoes(String observacoes) {

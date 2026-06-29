@@ -26,14 +26,10 @@ public abstract class Profissional extends Pessoa {
         this.horarios             = new ArrayList<>();
     }
 
-    public String                  getEspecialidade()        { 
-return especialidade; }
-    public String                  getRegistroProfissional() { 
-return registroProfissional; }
-    public double                  getValorConsulta()        { 
-return valorConsulta; }
-    public List<HorarioDisponivel> getHorarios()             { 
-return horarios; }
+    public String                  getEspecialidade()        { return especialidade; }
+    public String                  getRegistroProfissional() { return registroProfissional; }
+    public double                  getValorConsulta()        { return valorConsulta; }
+    public List<HorarioDisponivel> getHorarios()             { return horarios; }
 
     
 // SOBRECARGA: atualiza só registro e valor, sem mexer nos horarios
@@ -124,14 +120,7 @@ return horarios; }
     }
 }
 
-// ------------------------------------------ abaixo as subclasses -------------
-
-// fisioterapeuta 
-
-
-
-
-
+// ---- subclasses de Profissional ----
 
 class Fisioterapeuta extends Profissional {
     private int totalSessoesPrevistas;
@@ -144,10 +133,8 @@ class Fisioterapeuta extends Profissional {
     public int getTotalSessoesPrevistas() { return totalSessoesPrevistas; }
     public void setTotalSessoesPrevistas(int s) { if (s >= 0) this.totalSessoesPrevistas = s; }
 
-    // sobrescr: adiciona tag fisioterapia nas observações do atendimento
-   
-
- @Override
+    // SOBRESCRITA: mesmo nome e parâmetros, Fisioterapeuta redefine comportamento (resolvido em tempo de execução)
+    @Override
     public void registrarEspecifico(Atendimento atendimento) {
         if (atendimento == null) return;
         String obs = atendimento.getObservacoes();
@@ -159,16 +146,6 @@ class Fisioterapeuta extends Profissional {
         return super.exibirResumo() + " | Sessoes Previstas: " + totalSessoesPrevistas;
     }
 }
-
-// --------------------------------------
-
-
-
-
-
-
-
-// psicólogo 
 
 class Psicologo extends Profissional {
     private String abordagem;
@@ -232,16 +209,6 @@ class Nutricionista extends Profissional {
         return super.exibirResumo() + " | Plano Alimentar: " + planoAlimentar;
     }
 }
-
-// ----------------------------------
-
-
-
-
-
-
-
-// clínico geral 
 
 class ClinicoGeral extends Profissional {
     private String encaminhamento; // encaminhamento para especialista quando necessário

@@ -2,7 +2,7 @@ package model;
 
 // representa um paciente da clínica, herda os dados basicos de Pessoa
 public class Paciente extends Pessoa {
-    // Convenio so existe vinculado ao Paciente
+    // ASSOCIAÇÃO: Paciente conhece Convenio, mas ambos existem independentemente
     private Convenio convenio;
     private String   status;
 

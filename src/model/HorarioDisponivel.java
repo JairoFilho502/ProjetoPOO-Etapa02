@@ -3,6 +3,10 @@ import java.util.Objects;
 
 
 
+
+
+
+
 // guarda um dia e turno em que o profissional estará disponível
 public class HorarioDisponivel {
     private String diaSemana;
@@ -22,6 +26,11 @@ return turno; }
     
 
 
+
+
+
+
+
 // salva o dia em minúsculo pra não ter problema com comparações!!
     public void setDiaSemana(String diaSemana) {
         if (diaSemana == null || diaSemana.trim().isEmpty())
@@ -30,6 +39,8 @@ return turno; }
     }
 
     
+
+
 
 
 
@@ -52,7 +63,11 @@ return turno; }
 
 
 
- // dois horários são iguais se têm o mesmo dia e turno
+
+
+
+
+ // dois horarios sao iguais se tem o mesmo dia e turno
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
@@ -63,7 +78,10 @@ return turno; }
 
     
 
-// precisa sobrescrever o hashCode junto com o equals, senão dá bug nas coleções
+
+
+
+// precisa sobrescrever o hashCode junto com o equals, senao da bug nas colecoes
     @Override
     public int hashCode() {
         return Objects.hash(diaSemana.toLowerCase(), turno.toLowerCase());

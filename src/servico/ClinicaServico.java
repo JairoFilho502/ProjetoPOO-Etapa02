@@ -1,48 +1,49 @@
 package servico;
 
-import model.Paciente;
-import model.Profissional;
-import model.Consulta;
-import model.Atendimento;
-import model.HorarioDisponivel;
-import model.Pessoa;
-import financeiro.Pagamento;
 import excecoes.ConsultaNaoEncontradaException;
+import excecoes.ConvenioNaoCobreException;
 import excecoes.HorarioIndisponivelException;
+import excecoes.OperacaoInvalidaException;
 import excecoes.PacienteInativoException;
 import excecoes.PacienteNaoEncontradoException;
 import excecoes.ProfissionalNaoEncontradoException;
-
+import financeiro.Pagamento;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import model.Atendimento;
+import model.Consulta;
+import model.HorarioDisponivel;
+import model.Paciente;
+import model.Pessoa;
+import model.Profissional;
 
 public class ClinicaServico {
 
-    // R10 — 10 coleções distintas com tipos apropriados para cada uso
+    // R10 — 10 coleçoes distintas com tipos apropriados para cada uso
 
-    // ArrayList<Paciente>: ordem de inserção importa — pacientes listados na ordem
+    // ArrayList<Paciente>: ordem de insercao importa — pacientes listados na ordem
     // de cadastro
     private List<Paciente> pacientes = new ArrayList<>();
 
-    // ArrayList<Profissional>: ordem de inserção importa — profissionais listados
+    // ArrayList<Profissional>: ordem de insercao importa — profissionais listados
     // na ordem de cadastro
     private List<Profissional> profissionais = new ArrayList<>();
 
-    // ArrayList<Consulta>: ordem de inserção importa — índice usado para
+    // ArrayList<Consulta>: ordem de insercao importa — indice usado para
     // referenciar atendimentos
     private List<Consulta> consultas = new ArrayList<>();
 
-    // ArrayList<Atendimento>: mantém histórico cronológico dos atendimentos
+    // ArrayList<Atendimento>: mantem historico cronologico dos atendimentos
     private List<Atendimento> atendimentos = new ArrayList<>();
 
-    // ArrayList<Pagamento>: mantém histórico cronológico dos pagamentos
+    // ArrayList<Pagamento>: mantem historico cronologico dos pagamentos
     private List<Pagamento> pagamentos = new ArrayList<>();
 
-    // ArrayList<Pessoa>: lista unificada para relatório polimórfico (R5)
+    // ArrayList<Pessoa>: lista unificada para relatorio polimorfico (R5)
     private List<Pessoa> pessoasCadastradas = new ArrayList<>();
 
     // HashSet<String>: sem duplicatas e busca O(1) — ideal para verificar CPF já
@@ -50,20 +51,23 @@ public class ClinicaServico {
     private Set<String> cpfsCadastrados = new HashSet<>();
 
     // HashMap<String, Paciente>: acesso direto por CPF sem percorrer lista — O(1)
-    // médio
+    // medio
     private Map<String, Paciente> pacientesPorCpf = new HashMap<>();
 
-    // HashMap<String, Profissional>: acesso direto por nome — O(1) médio
+    // HashMap<String, Profissional>: acesso direto por nome — O(1) medio
     private Map<String, Profissional> profissionaisPorNome = new HashMap<>();
 
     // ArrayList<Double>: mantém histórico de multas na ordem em que foram aplicadas
     private List<Double> multas = new ArrayList<>();
 
+  
+
+
     // pacientes
 
     public void cadastrarPaciente(String nome, String cpf) {
 
-        // cpfsCadastrados.add retorna false se o CPF já existir no HashSet
+        // retorna false se o cpf ja existir no hashSet
         if (!cpfsCadastrados.add(cpf))
             throw new IllegalArgumentException("CPF " + cpf + " ja cadastrado.");
         Paciente p = new Paciente(nome, cpf);
@@ -72,6 +76,10 @@ public class ClinicaServico {
         pacientesPorCpf.put(cpf, p);
     }
 
+
+
+
+
     // SOBRECARGA: complementar sem convênio
 
     public void complementarPaciente(String cpf, int idade, String telefone)
@@ -79,14 +87,21 @@ public class ClinicaServico {
         buscarPaciente(cpf).complementar(idade, telefone);
     }
 
+
+
+
     // SOBRECARGA: complementar com convênio
     public void complementarPaciente(String cpf, int idade, String telefone, String nomeConvenio)
             throws PacienteNaoEncontradoException {
         buscarPaciente(cpf).complementar(idade, telefone, nomeConvenio);
     }
 
-    // busca pelo HashMap: O(1) médio, muito mais rápido que percorrer a lista
-    // inteira
+
+
+
+
+
+    // busca pelo HashMap: O(1) medio, muito mais rapido que percorrer a lista
 
     public Paciente buscarPaciente(String cpf) throws PacienteNaoEncontradoException {
         Paciente p = pacientesPorCpf.get(cpf);
@@ -188,12 +203,25 @@ public class ClinicaServico {
     }
 
     public void cancelarConsulta(String cpf, String data, String horario)
-            throws ConsultaNaoEncontradaException {
-        encontrarConsulta(cpf, data, horario).cancelar();
+            throws ConsultaNaoEncontradaException, OperacaoInvalidaException {
+        Consulta c = encontrarConsulta(cpf, data, horario);
+        if (c.getStatus().equals("realizada"))
+            throw new OperacaoInvalidaException("Consulta ja foi realizada, cancelamento invalido.");
+        if (c.getStatus().equals("cancelada"))
+            throw new OperacaoInvalidaException("Consulta ja esta cancelada.");
+        c.cancelar();
     }
 
-    // registra atendimento a partir de um objeto Atendimento já construído pelo
-    // Main.
+    // lanca ConvenioNaoCobreException se paciente nao tem convenio cadastrado
+    public void verificarConvenioParaPagamento(String cpfPaciente)
+            throws PacienteNaoEncontradoException, ConvenioNaoCobreException {
+        Paciente p = buscarPaciente(cpfPaciente);
+        if (p.getConvenio() == null)
+            throw new ConvenioNaoCobreException(
+                    "Paciente " + cpfPaciente + " nao possui convenio cadastrado.");
+    }
+
+    // registra atendimento a partir de um objeto Atendimento ja construido pelo Main
     public void registrarAtendimento(Atendimento atendimento, int indiceConsulta)
             throws ConsultaNaoEncontradaException {
         if (indiceConsulta < 0 || indiceConsulta >= consultas.size())
@@ -233,7 +261,7 @@ public class ClinicaServico {
         return new ArrayList<>(pessoasCadastradas);
     }
 
-    // verifica se o profissional já tem consulta agendada naquele dia/horário
+    // verifica se o profissional ja tem consulta agendada naquele dia/horario
     public boolean temConflito(String nomeProf, String data, String horario) {
         for (Consulta c : consultas) {
             if (c.getNomeProfissional().equals(nomeProf)
@@ -245,7 +273,7 @@ public class ClinicaServico {
         return false;
     }
 
-    // testa horários das 8h às 18h e retorna o primeiro que estiver livre.
+    // testa horarios das 8h as 18h e retorna o primeiro que estiver livre
     public String sugerirHorario(String nomeProf, String data) {
         for (int h = 8; h <= 18; h++) {
             String teste = (h < 10 ? "0" + h : "" + h) + ":00";
@@ -255,13 +283,13 @@ public class ClinicaServico {
         return "";
     }
 
+    // busca por CPF/data/hora sem filtrar status — permite checar qualquer consulta
     private Consulta encontrarConsulta(String cpf, String data, String horario)
             throws ConsultaNaoEncontradaException {
         for (Consulta c : consultas) {
             if (c.getCpfPaciente().equals(cpf)
                     && c.getData().equals(data)
-                    && c.getHorario().equals(horario)
-                    && c.getStatus().equals("agendada"))
+                    && c.getHorario().equals(horario))
                 return c;
         }
         throw new ConsultaNaoEncontradaException(
